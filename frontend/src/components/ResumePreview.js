@@ -1,30 +1,59 @@
-// frontend/src/components/ResumePreview.js
-import React from 'react';
+import React, { forwardRef } from 'react';
+import TemplateA from './templates/TemplateA'; 
+import TemplateB from './templates/TemplateB'; 
+import TemplateC from './templates/TemplateC'; 
+import TemplateD from './templates/TemplateD';
+import TemplateE from './templates/TemplateE';
 
-// Import all templates
-import TemplateA from './templates/TemplateA'; // This is now assigned to 'classic'
-import TemplateB from './templates/TemplateB'; // This is now assigned to 'modern'
-import TemplateC from './templates/TemplateC'; // Minimal Image (Placeholder)
-import TemplateD from './templates/TemplateD'; // Minimal (Placeholder)
-// REMOVED: import TemplateClassic (since TemplateA now serves this role)
+const ResumePreview = forwardRef((props, ref) => {
+    
+    const { resumeData, templateId, accentColor, targetProfile } = props;
 
-const ResumePreview = ({ resumeData, templateId, accentColor }) => {
+    // Data Cleaning
+    let cleanData = {};
+    try {
+        if (resumeData) cleanData = JSON.parse(JSON.stringify(resumeData));
+    } catch (e) { cleanData = {}; }
 
-  switch (templateId) {
-    // MODIFIED: 'classic' now uses TemplateA
-    case 'classic':
-      return <TemplateA resumeData={resumeData} accentColor={accentColor} />;
-    // MODIFIED: 'modern' now uses TemplateB
-    case 'modern':
-      return <TemplateB resumeData={resumeData} accentColor={accentColor} />;
-    case 'minimalImage':
-      return <TemplateC resumeData={resumeData} accentColor={accentColor} />;
-    case 'minimal':
-      return <TemplateD resumeData={resumeData} accentColor={accentColor} />;
+    // Helper: Sort Newest First
+    const sortNewestFirst = (items) => {
+        if (!items || !Array.isArray(items)) return [];
+        return items.sort((a, b) => {
+            const dateStrA = a.startDate || a.date; 
+            const dateStrB = b.startDate || b.date;
+            const dateA = dateStrA ? new Date(dateStrA).getTime() : 0;
+            const dateB = dateStrB ? new Date(dateStrB).getTime() : 0;
+            return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+        });
+    };
 
-    default: // Default to classic
-      return <TemplateA resumeData={resumeData} accentColor={accentColor} />;
-  }
-};
+    if (cleanData.experience) cleanData.experience = sortNewestFirst(cleanData.experience);
+    if (cleanData.projects) cleanData.projects = sortNewestFirst(cleanData.projects);
+    if (cleanData.education) cleanData.education = sortNewestFirst(cleanData.education);
+    if (cleanData.certificates) cleanData.certificates = sortNewestFirst(cleanData.certificates);
+
+    // Render Template
+    const renderTemplate = () => {
+        switch (templateId) {
+            case 'classic': return <TemplateA data={cleanData} accentColor={accentColor} targetProfile={targetProfile} />;
+            case 'modern': return <TemplateB data={cleanData} accentColor={accentColor} targetProfile={targetProfile} />;
+            case 'minimalImage': return <TemplateC data={cleanData} accentColor={accentColor} targetProfile={targetProfile} />;
+            case 'minimal': return <TemplateD data={cleanData} accentColor={accentColor} targetProfile={targetProfile} />;
+            case 'New': return <TemplateE data={cleanData} accentColor={accentColor} targetProfile={targetProfile} />;
+            default: return <TemplateA data={cleanData} accentColor={accentColor} targetProfile={targetProfile} />;
+        }
+    };
+
+    return (
+        <div 
+            ref={ref} 
+            id="resume-preview-id" 
+            // === LOGIC UPDATE: Adds 'full-width' class only for Template E ===
+            className={`resume-preview-container ${templateId === 'New' ? 'full-width' : ''}`}
+        >
+            {renderTemplate()}
+        </div>
+    );
+});
 
 export default ResumePreview;

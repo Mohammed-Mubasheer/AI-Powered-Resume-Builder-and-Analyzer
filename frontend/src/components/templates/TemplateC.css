@@ -1,144 +1,154 @@
-/* frontend/src/components/templates/TemplateC.css */
+/* src/components/templates/TemplateC.css */
 
-.preview-container.template-minimal-image {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Common sans-serif */
-  color: #333;
-  line-height: 1.5;
+.template-c-container {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    color: #333;
+    line-height: 1.5;
+    font-size: 10.5pt;
+    width: 100%;
+    background: #fff;
+    box-sizing: border-box;
+    padding: 0;
 }
 
-/* --- Sidebar --- */
-.minimal-image-sidebar {
-  padding: 30px 20px 30px 30px; /* Adjust padding */
-  /* background-color: #f8f9fa; Optional light background */
-}
-.avatar-section {
+/* === HEADER === */
+.template-c-header {
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #333; /* The solid line under header */
+    padding-bottom: 20px;
 }
-.minimal-image-section {
-    margin-bottom: 25px;
+
+.template-c-name {
+    font-size: 32pt;
+    font-weight: 700;
+    color: #1155cc; /* Royal Blue from screenshot */
+    margin-bottom: 5px;
+    line-height: 1;
 }
-.minimal-image-sidebar-title {
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: #555 !important;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px !important;
-    padding-bottom: 4px;
-    border-bottom: 1px solid #ddd; /* Light border below sidebar titles */
-}
-.sidebar-text {
-    display: block;
-    font-size: 13px;
-    color: #555;
-    margin-bottom: 6px;
-    word-break: break-word; /* Wrap long emails/links */
-}
-.sidebar-text .anticon {
-    margin-right: 8px;
-    color: var(--accent-color); /* Use accent color for icons */
-}
-.sidebar-edu-item {
+
+.template-c-role {
+    font-size: 16pt;
+    font-style: italic;
+    color: #444;
     margin-bottom: 15px;
 }
-.sidebar-degree {
-    display: block;
-    font-weight: 600;
-    font-size: 14px;
+
+.template-c-contact {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    font-size: 10pt;
+    color: #444;
 }
-.sidebar-school {
-    display: block;
-    font-size: 13px;
-    color: #555;
+
+.template-c-contact span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
-.sidebar-date {
-    display: block;
-    font-size: 12px;
-    color: #777;
+
+.template-c-contact a {
+    color: inherit;
+    text-decoration: none;
 }
-.sidebar-skill {
-    display: block;
-    font-size: 14px;
-    color: #555;
+
+/* === SUMMARY === */
+.template-c-summary {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 0 10px;
+    line-height: 1.6;
+}
+
+/* === SECTIONS === */
+.template-c-section {
+    margin-bottom: 30px;
+}
+
+.template-c-section-title {
+    text-align: center;
+    font-size: 14pt;
+    font-weight: 700;
+    color: #1155cc; /* Royal Blue */
+    margin-bottom: 20px;
+}
+
+/* === TIMELINE CONTAINER === */
+/* This creates the vertical line on the left */
+.template-c-timeline {
+    border-left: 3px solid #ccc; /* The grey vertical line */
+    margin-left: 20px;
+    padding-left: 30px;
+    position: relative;
+}
+
+/* === ITEMS === */
+.template-c-item {
+    position: relative; /* Needed for absolute positioning the dot */
+    margin-bottom: 30px;
+}
+
+/* The Grey Dot on the Line */
+.template-c-dot {
+    position: absolute;
+    left: -39px; /* Adjust based on padding-left + border width */
+    top: 5px;
+    width: 14px;
+    height: 14px;
+    background-color: #ccc;
+    border-radius: 50%;
+    border: 3px solid #fff; /* White ring to separate from line if needed */
+}
+
+/* Item Content Row: Title ... Date */
+.template-c-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 5px;
+}
+
+.template-c-main-text {
+    font-weight: 700;
+    font-size: 11pt;
+    color: #333;
+}
+
+.template-c-date {
+    font-style: italic;
+    font-size: 10pt;
+    color: #666;
+}
+
+/* Bullets */
+.template-c-list {
+    margin: 5px 0 0 0;
+    padding-left: 18px;
+    font-size: 10.5pt;
+}
+
+.template-c-list li {
     margin-bottom: 4px;
 }
 
+/* === SKILLS (2 Columns) === */
+.template-c-skills-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 40px; /* Indent skills a bit */
+}
 
-/* --- Main Content --- */
-.minimal-image-main {
-  padding: 30px 30px 30px 10px; /* Adjust padding */
-  border-left: 1px solid #eee; /* Subtle separator line */
+.template-c-skill-col {
+    width: 45%;
 }
-.main-header {
-    margin-bottom: 25px;
+
+.template-c-skill-list {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 10.5pt;
 }
-.minimal-image-name {
-    font-size: 36px !important; /* Large name */
-    font-weight: 700 !important;
-    color: var(--accent-color) !important; /* Use accent color */
-    margin-bottom: 0px !important;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-.minimal-image-profession {
-    font-size: 14px;
-    font-weight: 600;
-    color: #555;
-    letter-spacing: 2px;
-    margin-top: -5px; /* Pull up slightly */
-    display: block;
-}
-.minimal-image-main-title {
-    font-size: 16px !important;
-    font-weight: 700 !important;
-    color: var(--accent-color) !important; /* Use accent color */
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 15px !important;
-    padding-bottom: 4px;
-    border-bottom: 1px solid #ddd;
-}
-.main-paragraph { /* For Summary */
-  font-size: 14px;
-  color: #555;
-}
-.main-item {
-  margin-bottom: 20px;
-}
-.main-item-title {
-  font-weight: 700 !important;
-  font-size: 15px !important;
-  color: #333;
-  margin-bottom: 1px !important;
-}
-.main-item-subtitle {
-  font-weight: 600;
-  font-size: 14px;
-  color: #555; /* Changed from accent color */
-  display: block;
-  margin-bottom: 6px;
-}
-.main-item-date {
-  font-size: 13px;
-  font-weight: 500;
-  color: #777;
-  text-align: right;
-  white-space: nowrap;
-}
-.main-item-description { /* For Experience/Project bullet points */
-  font-size: 14px;
-  color: #555;
-  margin-top: 5px;
-  list-style-type: disc;
-  margin-left: 18px; /* Indent bullets */
-  padding-left: 0;
-}
-.main-item-description li {
-    margin-bottom: 4px;
-}
-.main-item-gpa { /* Specific style for GPA if needed in main */
-    margin: 2px 0 0 0 !important;
-    font-size: 13px !important;
-    color: #777 !important;
+
+.template-c-skill-list li {
+    margin-bottom: 6px;
 }

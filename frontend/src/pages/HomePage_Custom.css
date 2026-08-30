@@ -1,36 +1,138 @@
-/* frontend/src/pages/HomePage_Custom.css */
+/* src/pages/HomePage_Custom.css */
+.home-container {
+    min-height: 100vh;
+    background-color: #f8fafc;
+    font-family: 'Inter', sans-serif;
+}
 
-.dashboard-card {
-    width: 200px; /* Set a fixed width */
-    height: 200px; /* Set a fixed height */
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* === HERO SECTION (Clean Light Mode) === */
+.home-hero {
+    /* THE NEW PROFESSIONAL GRADIENT */
+    background: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+    
+    padding: 100px 24px 140px;
     text-align: center;
-    border-radius: 8px; /* Slightly rounded corners */
-    border: 1px solid #e5e7eb; /* Light border */
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* Subtle shadow */
+    color: white;
+    border-radius: 0 0 30px 30px;
+    box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.4);
 }
 
-.dashboard-card:hover {
-    border-color: #a5b4fc; /* Example hover color */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+.home-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 16px 0;
+    color: #ffffff; /* Dark Slate */
+    letter-spacing: -0.02em;
+    text-shadow: none; /* Removed shadow */
 }
 
-.dashboard-card .ant-card-body {
-    padding: 16px; /* Adjust padding if needed */
+.home-hero p {
+    font-size: 1.1rem;
+    color: #ffffff; /* Clean Gray */
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+    text-shadow: none;
+}
+
+/* === CONTENT SECTION === */
+.home-content {
+    max-width: 1000px;
+    margin: 40px auto; /* Standard spacing */
+    padding: 0 24px;
     display: flex;
     justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+/* === ACTION CARDS === */
+.action-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0; /* Crisp border */
+    border-radius: 12px;
+    padding: 40px 32px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
     align-items: center;
 }
 
-.dashboard-card-icon {
-    font-size: 48px; /* Make icon larger */
-    color: #6366f1; /* Example icon color (indigo) */
-    margin-bottom: 8px; /* Space between icon and text */
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: #cbd5e1;
 }
 
-.dashboard-card .ant-typography strong {
-    font-size: 16px; /* Make text slightly larger */
-    color: #374151; /* Darker text */
+.icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 24px;
+}
+
+/* Builder Card: Blue Theme */
+.builder-card .icon-wrapper {
+    background: #eff6ff; /* Pale Blue */
+    color: #2563eb;      /* Professional Blue */
+}
+
+/* Analyzer Card: Green Theme */
+.analyzer-card .icon-wrapper {
+    background: #f0fdf4; /* Pale Green */
+    color: #16a34a;      /* Professional Green */
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 12px;
+}
+
+.card-desc {
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 32px;
+    min-height: 45px; 
+}
+
+/* Buttons */
+.action-btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+}
+.btn-primary:hover { 
+    background: #1d4ed8; 
+}
+
+.btn-outline {
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+}
+.btn-outline:hover { 
+    border-color: #16a34a;
+    color: #16a34a;
+    background: #ffffff;
 }

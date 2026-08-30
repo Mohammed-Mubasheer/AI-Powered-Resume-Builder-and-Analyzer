@@ -1,0 +1,217 @@
+/* src/pages/BuilderPage.css */
+
+/* === GENERAL === */
+.builder-layout {
+    min-height: 100vh;
+    background-color: #f8fafc;
+    font-family: 'Inter', sans-serif;
+}
+
+/* === HEADER (Premium Dark Theme) === */
+.builder-header {
+    background: linear-gradient(90deg, #0f172a 0%, #312e81 100%) !important;
+    padding: 0 24px !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.builder-header .ant-btn-text { color: rgba(255, 255, 255, 0.9) !important; font-weight: 500; }
+.builder-header .ant-btn-text:hover { color: #ffffff !important; background: rgba(255,255,255,0.1) !important; }
+.builder-header .ant-btn-ghost { color: white !important; border-color: rgba(255, 255, 255, 0.4) !important; }
+.builder-header .ant-btn-ghost:hover { border-color: white !important; background: rgba(255, 255, 255, 0.1) !important; }
+
+/* === DROPDOWN STYLING === */
+.header-select .ant-select-selector { background-color: rgba(255, 255, 255, 0.1) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; color: white !important; border-radius: 6px !important; }
+.header-select .ant-select-selection-item { color: white !important; font-weight: 500; }
+.header-select .ant-select-arrow { color: rgba(255, 255, 255, 0.7) !important; }
+
+/* === DASHBOARD HERO === */
+.dashboard-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+    padding: 60px 24px 100px;
+    text-align: center;
+    color: white;
+    border-radius: 0 0 30px 30px;
+    box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.4);
+    margin-bottom: -60px;
+}
+.dashboard-hero h1 { font-size: 2.5rem; font-weight: 800; margin: 0; color: white; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); }
+.dashboard-hero p { font-size: 1.1rem; opacity: 0.95; max-width: 600px; margin: 10px auto 0; color: #e0e7ff; }
+
+/* === DASHBOARD CONTENT === */
+.dashboard-container { max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; }
+.resume-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
+
+.dashboard-card {
+    background: #ffffff; border-radius: 20px; padding: 24px; height: 280px; 
+    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+    transition: all 0.3s ease; box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1); border: 1px solid rgba(0,0,0,0.02);
+    position: relative; cursor: pointer;
+}
+.dashboard-card:hover { transform: translateY(-8px); box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.2); }
+
+.create-card { background: #ffffff; border: 2px dashed #cbd5e1; }
+.create-card:hover { border-color: #312e81; background: #ffffff; }
+
+.create-icon-wrapper {
+    width: 64px; height: 64px; background: #e0e7ff; color: #312e81;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 28px; margin-bottom: 16px; transition: all 0.3s ease;
+}
+.create-card:hover .create-icon-wrapper { transform: scale(1.1); background: #312e81; color: white; }
+
+.resume-card-icon { font-size: 48px; color: #4f46e5; margin-bottom: 20px; opacity: 0.9; }
+.resume-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 8px; opacity: 0; transition: opacity 0.2s; }
+.dashboard-card:hover .resume-actions { opacity: 1; }
+.action-icon { width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #4b5563; transition: all 0.2s; }
+.action-icon:hover { background: #312e81; color: white; }
+.action-icon.delete:hover { background: #ef4444; color: white; }
+
+/* === EDITOR VIEW LAYOUT === */
+.editor-container { display: flex; height: calc(100vh - 64px); overflow: hidden; }
+.editor-form-panel { flex: 0 0 40%; max-width: 500px; background: #ffffff; border-right: 1px solid #e2e8f0; overflow-y: auto; }
+.editor-preview-panel { flex: 1; background-color: #525659; padding: 40px; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; }
+
+/* === THE OUTER PAPER WRAPPER === */
+.resume-paper-shadow {
+    background: white;
+    box-shadow: 0 0 30px rgba(0,0,0,0.6);
+    min-height: 297mm;
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+}
+
+/* === VISUAL MARKER (Safe Zone Guide) === */
+.resume-paper-shadow::after {
+    content: "--- Page 1 Safe Zone ---";
+    position: absolute;
+    top: 291mm; /* Guide line for where page actually breaks */
+    left: 0;
+    width: 100%;
+    border-top: 2px dashed #ff4d4f;
+    color: #ff4d4f;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0.7;
+    padding-top: 5px;
+}
+
+/* === CONTENT PADDING LOGIC (Screen Only) === */
+.resume-preview-container { padding-top: 6mm !important; 
+    
+    /* Simulates the Side Margins */
+    padding-left: 25px !important;
+    padding-right: 25px !important;
+    padding-bottom: 0 !important;
+
+    box-sizing: border-box !important;
+    width: 100% !important;
+    
+    /* Matches the Print Zoom */
+    zoom: 0.95 }
+
+.resume-preview-container.full-width { padding: 0 !important;
+    padding-top: 0 !important;
+    zoom: 0.95; }
+
+/* === PREMIUM BUTTONS & DROPDOWNS === */
+.premium-download-btn { background: #ffffff !important; color: #312e81 !important; border: none !important; font-weight: 700 !important; border-radius: 8px !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important; height: 36px !important; transition: all 0.3s ease !important; }
+.premium-download-btn:hover { background: #f8fafc !important; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important; color: #4f46e5 !important; }
+.ant-select-dropdown, .ant-popover-inner { background-color: #ffffff !important; border-radius: 16px !important; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2) !important; padding: 8px !important; border: 1px solid #f1f5f9 !important; }
+.ant-select-item { border-radius: 8px !important; margin-bottom: 4px !important; padding: 10px 12px !important; transition: all 0.2s !important; }
+.ant-select-item-option-active { background-color: #f1f5f9 !important; }
+.ant-select-item-option-selected { background-color: #eef2ff !important; color: #4f46e5 !important; font-weight: 600 !important; }
+.ant-list-item { border-radius: 8px !important; margin-bottom: 4px !important; padding: 12px !important; transition: all 0.2s !important; }
+.ant-list-item:hover { background-color: #f8fafc !important; }
+
+/* === PRINT STYLES (Final Alignment Fix) === */
+@media print {
+    
+    /* 1. MAXIMIZE PAPER SPACE */
+    /* Reduced margins from 15mm to 6mm to recover ~2cm of vertical space */
+    @page {
+        margin: 6mm 0; 
+        size: auto;
+    }
+
+    /* 2. HIDE UI ELEMENTS */
+    .builder-header, 
+    .editor-form-panel, 
+    .ant-modal-root, 
+    .ant-message, 
+    .ant-drawer, 
+    .ant-tooltip, 
+    .ant-popover {
+        display: none !important;
+    }
+    
+    .resume-paper-shadow::after { display: none !important; }
+
+    /* 3. RESET LAYOUT */
+    body, 
+    .builder-layout, 
+    .editor-container, 
+    .editor-preview-panel {
+        background: white !important;
+        height: auto !important;
+        width: 100% !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        display: block !important;
+    }
+
+    .resume-paper-shadow {
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        min-height: 100vh !important;
+    }
+
+    /* 4. PREVENT BAD SPLITS */
+    li, p, h1, h2, h3, h4, h5 {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* 5. THE FIX: REMOVED TRANSFORM, OPTIMIZED SPACING */
+    .resume-preview-container {
+        /* Reduced Side Padding (25px) -> Makes text wider -> Fewer lines -> Saves Height */
+        padding: 0 25px !important; 
+        box-sizing: border-box !important;
+        width: 100% !important;
+        
+        /* Safe Zoom for Chrome/Edge (Does not break pagination like transform) */
+        zoom: 0.95; 
+        
+        /* Force remove any transforms that cause gaps */
+        transform: none !important; 
+    }
+
+    /* Logic for Template E (Full Width) */
+    .resume-preview-container.full-width {
+        padding: 0 !important;
+        zoom: 0.95;
+        transform: none !important;
+    }
+
+    /* 6. COLOR PRINTING */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}

@@ -1,0 +1,84 @@
+/* src/pages/LoginPage.css */
+/* Update ONLY this section in LoginPage.css */
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* THE NEW PROFESSIONAL GRADIENT */
+    background: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+    
+    background-size: cover;
+    font-family: 'Inter', sans-serif;
+}
+/* Rest of the file stays the same... */
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0; /* Subtle border */
+    border-radius: 12px;       /* Smaller, tighter radius */
+    padding: 40px 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Very subtle shadow */
+    text-align: center;
+}
+
+.login-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #0f172a; /* Dark Slate (Almost Black) */
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    color: #64748b; /* Professional Gray */
+    margin-bottom: 32px;
+    font-size: 0.95rem;
+}
+
+.login-input {
+    height: 42px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    font-size: 15px;
+    margin-bottom: 20px;
+}
+
+.login-input:hover, .login-input:focus {
+    border-color: #2563eb; /* Professional Blue */
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.login-btn {
+    height: 42px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 15px;
+    background: #2563eb; /* Solid Professional Blue */
+    color: white;
+    border: none;
+    margin-bottom: 16px;
+    transition: background 0.2s;
+}
+
+.login-btn:hover {
+    background: #1d4ed8; /* Darker Blue on hover */
+    transform: none;      /* Removed "jumpy" movement */
+    box-shadow: none;
+}
+
+.login-footer {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 16px;
+}
+
+.login-footer a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}

@@ -1,160 +1,112 @@
-/* frontend/src/components/templates/TemplateA.css */
+/* src/components/templates/TemplateA.css */
 
-/* MODIFIED: Base container styles */
-.preview-container.template-classic-preview {
-  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif; /* Font stack like screenshot */
-  color: #374151; /* Default text color */
-  padding: 10px 20px; /* Add some padding */
+.template-a-container {
+    font-family: 'Roboto', 'Arial', sans-serif;
+    color: #333;
+    font-size: 10pt;
+    line-height: 1.5;
+    width: 100%;
+    background: #fff;
+    box-sizing: border-box;
+    padding: 0; 
 }
 
-/* --- Header Styles --- */
-.classic-header {
+/* === HEADER === */
+.template-a-header {
     text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 5px;
 }
-.classic-name {
-    /* Color set by inline style using accentColor */
-    font-weight: 600 !important;
-    margin-bottom: 10px !important;
-    font-size: 26px !important;
-    text-transform: uppercase;
+
+.template-a-name {
+    font-size: 24pt;
+    font-weight: 700;
+    color: #2e3e4e; /* Dark Slate Blue/Grey from screenshot */
+    margin-bottom: 8px;
+    text-transform: none;
 }
-.classic-contact-info {
+
+.template-a-contact {
+    display: flex;
     justify-content: center;
-    gap: 12px 20px; /* Vertical and Horizontal gap */
-    font-size: 13px;
-    color: #4b5563; /* Medium gray */
-    flex-wrap: wrap; /* Allow wrapping */
-    margin-bottom: 5px; /* Space before GitHub if present */
+    align-items: center;
+    gap: 15px;
+    font-size: 9pt;
+    color: #444;
 }
-.github-info {
-    justify-content: center;
-    font-size: 13px;
-    color: #4b5563;
-    display: flex; /* Needed for ContactItem alignment */
-    margin-top: 5px; /* Space above GitHub */
-}
-.classic-header .contact-item svg { /* Style icons within header */
-    color: #6b7280; /* Grey icons */
-    font-size: 15px;
-    margin-top: -2px; /* Fine-tune vertical alignment */
-}
-.classic-divider {
-    border-top-width: 1px !important; /* Thinner divider */
-    margin: 10px 0 !important;
-}
-.contact-item { /* General ContactItem style */
+
+.template-a-contact span {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
 }
 
-/* --- Section Styles --- */
-.preview-section {
-  margin-bottom: 18px; /* Consistent section spacing */
-}
-.preview-section-title.classic-title {
-  color: var(--accent-color) !important;
-  font-weight: 600 !important;
-  font-size: 14px !important; /* Smaller title */
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  border-bottom: none !important; /* No underline */
-  padding-bottom: 2px;
-  margin-bottom: 10px !important;
-}
-.classic-paragraph { /* For Summary and Project Description */
-  font-size: 14px;
-  line-height: 1.5;
-  color: #4b5563; /* Slightly lighter than default */
+.template-a-contact a {
+    color: inherit;
+    text-decoration: none;
 }
 
-/* --- Experience/Education/Project Item Styles --- */
-.experience-item.classic-item {
-  position: relative;
-  padding-left: 15px;
-  margin-bottom: 15px; /* Keep consistent spacing between items */
+/* === SECTIONS === */
+.template-a-section {
+    margin-bottom: 20px;
 }
 
-.experience-item.classic-item::before { /* Vertical Timeline Bar */
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0; /* MODIFIED: Start from the very top of the item */
-  height: 100%; /* MODIFIED: Make it span the full height of the parent */
-  width: 3px;
-  background-color: var(--accent-color);
-  border-radius: 2px;
-}
-.preview-section.experience-item.classic-item:last-child::before {
-    /* Make the bar shorter for the last item in a section */
-    height: 15px; /* Adjust height as needed */
+.template-a-section-title {
+    font-size: 11pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #2e3e4e;
+    border-bottom: 1px solid #000; /* Solid black line */
+    margin-bottom: 12px;
+    padding-bottom: 2px;
+    letter-spacing: 0.5px;
 }
 
-/* Remove dot style if previously defined */
-.experience-item.classic-item::after {
-  display: none;
+/* === ITEMS === */
+.template-a-item {
+    margin-bottom: 15px;
 }
 
-.classic-item-title { /* Job Title, Degree, Project Name */
-  font-weight: 700 !important; /* Bold */
-  font-size: 15px !important;
-  margin-bottom: 1px !important; /* Reduced space */
-  color: #1f2937; /* Darker text */
-}
-.classic-item-subtitle { /* Company, School, Project Type */
-  font-weight: 600; /* Bolder than regular text */
-  color: #374151; /* Dark gray */
-  display: block;
-  font-size: 14px;
-  margin-bottom: 6px; /* Space below subtitle */
-}
-.classic-item-date {
-  font-size: 13px;
-  font-weight: 500;
-  color: #6b7280; /* Medium gray */
-  text-align: right;
-  white-space: nowrap;
-}
-.classic-item-description { /* Experience bullet points */
-  font-size: 14px;
-  line-height: 1.5;
-  padding-left: 0; /* Remove default padding */
-  margin-top: 5px;
-  list-style-type: disc; /* Standard bullets */
-  margin-left: 18px; /* Indent bullets */
-  color: #4b5563;
-}
-.classic-item-description li {
-    margin-bottom: 3px;
-}
-.classic-item-gpa { /* Specific style for GPA */
-    margin: 2px 0 0 0 !important;
-    font-size: 13px !important;
-    color: #6b7280 !important;
+/* Row 1: Job Title (Bold) */
+.template-a-row-title {
+    font-weight: 700;
+    font-size: 10.5pt;
+    color: #000;
+    margin-bottom: 2px;
 }
 
-/* --- Skills Styles --- */
-.classic-skills-list {
-    font-size: 14px;
-    color: #4b5563;
+/* Row 2: Company (Left) -- Date/Location (Right) */
+.template-a-row-details {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0px;
-    margin-top: 5px;
-    list-style: none !important;  /* MODIFIED: Add !important */
-    padding-left: 0 !important;   /* MODIFIED: Add !important */
-    margin-left: 0;             /* NEW: Ensure no margin */
+    justify-content: space-between;
+    font-size: 10pt;
+    color: #000;
+    margin-bottom: 4px;
 }
 
-.skill-separator {
-    color: var(--accent-color);
-    margin: 0 8px;
-    font-weight: bold;
+.template-a-company {
+    font-weight: 400; /* Regular weight */
 }
 
-/* Remove previous tag styles if they conflict */
-.resume-skills .ant-tag {
-    /* If you had specific tag styles, remove or adjust them */
-    display: none; /* Hide if using plain text for skills */
+.template-a-date-loc {
+    text-align: right;
+    font-weight: 400;
+}
+
+/* Bullets */
+.template-a-list {
+    margin: 2px 0 0 0;
+    padding-left: 15px;
+}
+
+.template-a-list li {
+    margin-bottom: 2px;
+    text-align: justify;
+    font-size: 10pt;
+}
+
+/* SKILLS */
+.template-a-skills-text {
+    font-size: 10pt;
+    line-height: 1.6;
 }

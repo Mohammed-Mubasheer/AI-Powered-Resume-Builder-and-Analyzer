@@ -1,167 +1,265 @@
-// frontend/src/components/templates/TemplateB.js
 import React from 'react';
-// NEW: Import Divider
-import { Typography, Row, Col, Space, Tag, Divider } from 'antd';
-import {
-    MailOutlined, PhoneOutlined, EnvironmentOutlined, LinkedinOutlined, GlobalOutlined, GithubOutlined
+import './TemplateB.css';
+import { LinkedinFilled,
+   GithubFilled,
+   MailFilled,
 } from '@ant-design/icons';
-import './TemplateB.css'; // Uses TemplateB.css
 import dayjs from 'dayjs';
 
-const { Title, Text, Paragraph } = Typography;
+const TemplateB = ({ data, accentColor, targetProfile }) => {
 
-// NEW: ContactItem specific for this template's header
-const ModernContactItem = ({ icon, text }) => (
-    <Space className="modern-contact-item">
-        {icon}
-        <Text>{text}</Text>
-    </Space>
-);
+    // 1. SETTINGS
+    const themeColor = '#d0e0e3'; // Pastel Blue fixed
 
-// Helper function remains the same
-const parseSortDate = (dateString, isPresent = false) => {
-    if (isPresent) return dayjs();
-    if (!dateString) return dayjs(0);
-    const date = dayjs(dateString);
-    return date.isValid() ? date : dayjs(0);
+    // Ensures the link always starts with https://
+const ensureUrl = (url) => {
+    if (!url) return '';
+    return url.startsWith('http') ? url : `https://${url}`;
 };
 
+    // 2. HELPERS
+    const formatDate = (date) => {
+        if (!date) return '';
+        return dayjs(date).isValid() ? dayjs(date).format('MMM YYYY') : date;
+    };
 
-const TemplateB = ({ resumeData, accentColor }) => {
-    const {
-        personalInfo = {},
-        summary = '',
-        experience = [],
-        education = [],
-        projects = [],
-        skills = []
-    } = resumeData || {};
+    // Helper for ranges (Start - End)
+    const formatDateRange = (start, end, current) => {
+        const startDate = formatDate(start);
+        const endDate = current ? 'Present' : formatDate(end);
+        
+        if (!startDate && !endDate) return '';
+        if (startDate && !endDate) return startDate; 
+        if (!startDate && endDate) return endDate;
+        
+        return `${startDate} - ${endDate}`;
+    };
 
-    const isGithub = (url) => url && (url.includes('github.com'));
-    const githubUrl = isGithub(personalInfo.website) ? personalInfo.website : null; // Get GitHub URL
+    const formatLink = (url) => url ? url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : '';
+
+    const formatLinkedIn = (url) => {
+        const match = url?.match(/in\/([^/]+)/);
+        return match ? `in/${match[1]}` : formatLink(url);
+    };
+
+    const formatGitHub = (url) => {
+        // Tries to grab just the username if it's a standard github url
+        const match = url?.match(/github\.com\/([^/]+)/);
+        return match ? `github.com/${match[1]}` : formatLink(url);
+    };
+
+    const renderList = (desc) => {
+        if (!desc) return null;
+        const lines = desc.split(/\n|•/).filter(line => line.trim().length > 0);
+        return (
+            <ul className="template-b-list">
+                {lines.map((line, idx) => <li key={idx}>{line.trim()}</li>)}
+            </ul>
+        );
+    };
+
+    // =========================================================================
+    // 3. DEFINE BLOCKS
+    // =========================================================================
+
+    const ExperienceBlock = data?.experience?.length > 0 && (
+        <div className="template-b-section">
+            <div className="template-b-section-title" style={{ backgroundColor: themeColor }}>
+                WORK EXPERIENCE
+            </div>
+            {data.experience.map((exp, i) => (
+                <div key={i} className="template-b-item">
+                    {/* Title | Company | Location (Left) ... Date (Right) */}
+                    <div className="template-b-row">
+                        <span className="template-b-main-text">
+                            {exp.title} 
+                            {exp.company ? ` | ${exp.company}` : ''}
+                            {/* ADDED LOCATION HERE */}
+                            {exp.location ? ` | ${exp.location}` : ''}
+                        </span>
+                        <span className="template-b-date">
+                            {formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking)}
+                        </span>
+                    </div>
+                    {renderList(exp.description)}
+                </div>
+            ))}
+        </div>
+    );
+
+    const ProjectsBlock = data?.projects?.length > 0 && (
+        <div className="template-b-section">
+            <div className="template-b-section-title" style={{ backgroundColor: themeColor }}>
+                PROJECTS
+            </div>
+            {data.projects.map((proj, i) => (
+                <div key={i} className="template-b-item">
+                    <div className="template-b-row">
+                        <span className="template-b-main-text">
+                            {proj.name} {proj.type ? `| ${proj.type}` : ''}
+                        </span>
+                        {/* UPDATED: Now shows Start - End range */}
+                        <span className="template-b-date">
+                            {formatDateRange(proj.startDate, proj.endDate, proj.currentlyWorking)}
+                        </span>
+                    </div>
+                    {renderList(proj.description)}
+                </div>
+            ))}
+        </div>
+    );
+
+    const EducationBlock = data?.education?.length > 0 && (
+        <div className="template-b-section">
+            <div className="template-b-section-title" style={{ backgroundColor: themeColor }}>
+                EDUCATION
+            </div>
+            {data.education.map((edu, i) => (
+                <div key={i} className="template-b-item">
+                    <div className="template-b-row">
+                        <span className="template-b-main-text">
+                            {edu.degree} | {edu.institutionName}
+                        </span>
+                        <span className="template-b-date">
+                            {formatDate(edu.date)}
+                        </span>
+                    </div>
+                    <ul className="template-b-list">
+                        {edu.fieldOfStudy && <li>Major in {edu.fieldOfStudy}</li>}
+                        {edu.gpa && <li>GPA: {edu.gpa}</li>}
+                    </ul>
+                </div>
+            ))}
+        </div>
+    );
+
+    // SKILLS: Split into 2 Columns
+    const SkillsBlock = data?.skills?.length > 0 && (() => {
+        const mid = Math.ceil(data.skills.length / 2);
+        const col1 = data.skills.slice(0, mid);
+        const col2 = data.skills.slice(mid);
+
+        return (
+            <div className="template-b-section">
+                <div className="template-b-section-title" style={{ backgroundColor: themeColor }}>
+                    TECHNICAL SKILLS
+                </div>
+                <div className="template-b-skills-container">
+                    <div className="template-b-skill-col">
+                        <ul className="template-b-skill-list">
+                            {col1.map((skill, idx) => <li key={idx}>{skill.name}</li>)}
+                        </ul>
+                    </div>
+                    <div className="template-b-skill-col">
+                        <ul className="template-b-skill-list">
+                            {col2.map((skill, idx) => <li key={idx}>{skill.name}</li>)}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        );
+    })();
+
+    const CertificatesBlock = data?.certificates?.length > 0 && (
+        <div className="template-b-section">
+            <div className="template-b-section-title" style={{ backgroundColor: themeColor }}>
+                AWARDS & ACHIEVEMENTS
+            </div>
+            <ul className="template-b-list">
+                {data.certificates.map((cert, i) => (
+                    <li key={i}>
+                        {cert.name}, {cert.issuer} ({dayjs(cert.date).format('YYYY')})
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+
+    // =========================================================================
+    // 4. ORDER LOGIC
+    // =========================================================================
+
+    let LayoutContent;
+
+    if (targetProfile === 'intern' || targetProfile === 'fresher') {
+        LayoutContent = <>{SkillsBlock}{EducationBlock}{ProjectsBlock}{ExperienceBlock}{CertificatesBlock}</>;
+    } 
+    else if (targetProfile === 'technical') {
+        LayoutContent = <>{SkillsBlock}{ProjectsBlock}{ExperienceBlock}{EducationBlock}{CertificatesBlock}</>;
+    } else if (targetProfile === 'switch') {
+         LayoutContent = (
+            <>
+                {SkillsBlock}
+                {ProjectsBlock}
+                {ExperienceBlock}
+                {CertificatesBlock}
+                {EducationBlock}
+            </>
+        );
+    }
+    else {
+        // Default "Experienced" order
+        LayoutContent = <>{ExperienceBlock}{ProjectsBlock}{SkillsBlock}{EducationBlock}{CertificatesBlock}</>;
+    }
+
+    // =========================================================================
+    // 5. RENDER
+    // =========================================================================
 
     return (
-        // Set CSS variable and add main class
-        <div className="preview-container template-modern" style={{ '--accent-color': accentColor }}>
+        <div className="template-b-container">
+            {/* Header */}
+            <header className="template-b-header">
+                <div className="template-b-name">
+                    {data?.personalInfo?.name || "GRACE VICTORIA"}
+                </div>
+                
+                <div className="template-b-contact">
+                    {[
+                        data?.personalInfo?.location,
+                        data?.personalInfo?.email && (<span><MailFilled style={{fontSize: '11px'}} /><a href={`mailto:${data.personalInfo.email}`} target="_blank" rel="noreferrer">{data.personalInfo.email}</a> | </span>
+                    ),
+                        data?.personalInfo?.linkedin && (
+    <span>
+        <LinkedinFilled style={{ fontSize: '11px' }} />
+        {/* href uses ensureUrl(), text uses formatLinkedIn() */}
+        <a href={ensureUrl(data.personalInfo.linkedin)} target="_blank" rel="noreferrer">
+            {formatLinkedIn(data.personalInfo.linkedin)}
+        </a>
+    </span>
+),
+                        data?.personalInfo?.website && (
+    <span>
+        <GithubFilled style={{ fontSize: '11px' }} />
+        <a href={ensureUrl(data.personalInfo.website)} target="_blank" rel="noreferrer">
+            {formatGitHub(data.personalInfo.website)}
+        </a>
+    </span>
+),
+                    ].filter(Boolean).map((item, i, arr) => (
+                        <React.Fragment key={i}>
+                            {item}
+                            {i < arr.length - 1 && <span> | </span>}
+                        </React.Fragment>
+                    ))}
+                </div>
 
-            {/* --- NEW: Header Section --- */}
-            <div className="modern-header">
-                 <Title level={1} className="modern-name">{personalInfo.name || 'Your Name'}</Title>
-                 <div className="modern-contact-info">
-                    {personalInfo.email && <ModernContactItem icon={<MailOutlined />} text={personalInfo.email} />}
-                    {personalInfo.phone && <ModernContactItem icon={<PhoneOutlined />} text={personalInfo.phone} />}
-                    {personalInfo.location && <ModernContactItem icon={<EnvironmentOutlined />} text={personalInfo.location} />}
-                    {personalInfo.linkedin && <ModernContactItem icon={<LinkedinOutlined />} text={personalInfo.linkedin} />}
-                    {/* Show GitHub Icon specifically if URL detected */}
-                    {githubUrl && <ModernContactItem icon={<GithubOutlined />} text={githubUrl} />}
-                    {/* Show Global Icon if website exists and is NOT GitHub */}
-                    {personalInfo.website && !githubUrl && <ModernContactItem icon={<GlobalOutlined />} text={personalInfo.website} />}
-                 </div>
-            </div>
-            {/* ------------------------- */}
-
-            {/* --- Main Content Area --- */}
-            <div className="modern-content">
-                {summary && (
-                    <div className="modern-section">
-                        <Title level={4} className="modern-section-title">Professional Summary</Title>
-                        <Paragraph className="modern-paragraph">{summary}</Paragraph>
-                    </div>
+                {data?.personalInfo?.profession && (
+                    <div className="template-b-role">{data.personalInfo.profession}</div>
                 )}
+            </header>
 
-                 {experience.length > 0 && (
-                     <div className="modern-section">
-                        <Title level={4} className="modern-section-title">Experience</Title>
-                        {experience
-                            .slice()
-                            .sort((a, b) => {
-                                const dateB = parseSortDate(b.endDate, b.currentlyWorking);
-                                const dateA = parseSortDate(a.endDate, a.currentlyWorking);
-                                if (dateB.isSame(dateA)) { return parseSortDate(b.startDate) - parseSortDate(a.startDate); }
-                                return dateB - dateA;
-                             })
-                            .map((job, index) => (
-                            <div key={index} className="modern-item">
-                                <Row justify="space-between" align="top">
-                                    <Col flex="auto">
-                                        <Title level={5} className="modern-item-title">{job.title || 'Job Title'}</Title>
-                                        {/* NEW: Accent color for subtitle */}
-                                        <Text className="modern-item-subtitle" style={{ color: accentColor }}>{job.company || 'Company Name'}</Text>
-                                    </Col>
-                                    <Col flex="none">
-                                        <Text className="modern-item-date">
-                                            {job.startDate ? dayjs(job.startDate).format('MMM YYYY') : ''} - {job.currentlyWorking ? 'Present' : (job.endDate ? dayjs(job.endDate).format('MMM YYYY') : '')}
-                                        </Text>
-                                    </Col>
-                                </Row>
-                                <Paragraph className="modern-item-description">
-                                    {/* Render description directly, assuming paragraphs or use list */}
-                                    {job.description || 'Description...'}
-                                </Paragraph>
-                            </div>
-                        ))}
-                    </div>
-                 )}
+            {/* Summary */}
+            {data?.summary && (
+                <div style={{ textAlign: 'center', marginBottom: '20px', padding: '0 20px' }}>
+                    {data.summary}
+                </div>
+            )}
 
-                {projects.length > 0 && (
-                    <div className="modern-section">
-                        <Title level={4} className="modern-section-title">Projects</Title>
-                        {projects.map((project, index) => (
-                            <div key={index} className="modern-item">
-                                <Row justify="space-between" align="top">
-                                    <Col flex="auto">
-                                        <Title level={5} className="modern-item-title">{project.name || 'Project Name'}</Title>
-                                        {project.type && <Text className="modern-item-subtitle" style={{ color: accentColor }}>{project.type}</Text>}
-                                    </Col>
-                                    {/* No date for projects */}
-                                </Row>
-                                <Paragraph className="modern-item-description">
-                                    {project.description || 'Project description...'}
-                                </Paragraph>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-
-                 {education.length > 0 && (
-                     <div className="modern-section">
-                        <Title level={4} className="modern-section-title">Education</Title>
-                         {education
-                            .slice()
-                            .sort((a, b) => parseSortDate(b.date) - parseSortDate(a.date))
-                            .map((school, index) => (
-                             <div key={index} className="modern-item">
-                                 <Row justify="space-between" align="top">
-                                    <Col flex="auto">
-                                        <Title level={5} className="modern-item-title">{school.degree}{school.fieldOfStudy ? ` in ${school.fieldOfStudy}` : '' || 'Degree'}</Title>
-                                        <Text className="modern-item-subtitle" style={{ color: accentColor }}>{school.institutionName || 'Institution Name'}</Text>
-                                        {school.gpa && <Paragraph className="modern-item-gpa">GPA: {school.gpa}</Paragraph>}
-                                    </Col>
-                                    <Col flex="none">
-                                        <Text className="modern-item-date">{school.date ? dayjs(school.date).format('MMM YYYY') : ''}</Text>
-                                    </Col>
-                                 </Row>
-                             </div>
-                         ))}
-                     </div>
-                 )}
-
-
-                  {skills.length > 0 && (
-                      <div className="modern-section">
-                        <Title level={4} className="modern-section-title">Skills</Title>
-                        {/* MODIFIED: Skills rendering as Tags */}
-                        <div className="modern-skills-list">
-                            {skills.map((skill, index) => (
-                                skill.name && <Tag key={index} className="modern-skill-tag">{skill.name}</Tag>
-                            ))}
-                        </div>
-                      </div>
-                  )}
-            </div> {/* End modern-content */}
+            {/* Content */}
+            {LayoutContent}
         </div>
     );
 };
 
-export default TemplateB; // Keep export name as TemplateB
+export default TemplateB;

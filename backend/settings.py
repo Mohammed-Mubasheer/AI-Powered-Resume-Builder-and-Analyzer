@@ -13,12 +13,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from dotenv import load_dotenv
 from pathlib import Path
-
+from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load the .env file
-load_dotenv(os.path.join(BASE_DIR, '.env'))
+load_dotenv(os.path.join(BASE_DIR, '.env')  )
 
 # Get the API key
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
@@ -36,7 +36,16 @@ SECRET_KEY = 'django-insecure-svy8%7modc#_-!yr-ek96kb#ou#p^sn-k8x3cb9xw#guh$ci_%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),  # Token lasts for 1 day during testing
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 
 # Application definition
@@ -135,6 +144,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Media files (User uploads)
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

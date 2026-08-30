@@ -1,166 +1,245 @@
-// frontend/src/components/templates/TemplateD.js
 import React from 'react';
-// NEW: Import Divider
-import { Typography, Row, Col, Space, Divider } from 'antd'; // No Tags needed for this template
-import {
-    MailOutlined, PhoneOutlined, EnvironmentOutlined, LinkedinOutlined, GlobalOutlined, GithubOutlined
-} from '@ant-design/icons';
-import './TemplateD.css'; // NEW: Import CSS file
+import './TemplateD.css';
 import dayjs from 'dayjs';
+import { LinkedinFilled, GithubFilled, MailFilled } from '@ant-design/icons';
 
-const { Title, Text, Paragraph } = Typography;
+const TemplateD = ({ data, accentColor, targetProfile }) => {
 
-// NEW: Helper function (ensure dayjs is imported)
-const parseSortDate = (dateString, isPresent = false) => {
-    if (isPresent) return dayjs();
-    if (!dateString) return dayjs(0);
-    const date = dayjs(dateString);
-    return date.isValid() ? date : dayjs(0);
+    // 1. SETTINGS
+    const themeColor = '#1a5c40'; // Forest Green Fixed
+
+    // Ensures the link always starts with https://
+const ensureUrl = (url) => {
+    if (!url) return '';
+    return url.startsWith('http') ? url : `https://${url}`;
 };
 
-// NEW: ContactItem specific for this template's header
-const MinimalContactItem = ({ icon, text }) => (
-    <Space className="minimal-contact-item">
-        {icon}
-        <Text>{text}</Text>
-    </Space>
-);
+    // 2. HELPERS
+    const formatDate = (date) => {
+        if (!date) return '';
+        // Screenshot uses full month year: "October 2023"
+        return dayjs(date).isValid() ? dayjs(date).format('MMMM YYYY') : date;
+    };
 
+    const formatDateRange = (start, end, current) => {
+        const startDate = formatDate(start);
+        const endDate = current ? 'Present' : formatDate(end);
+        if (!startDate && !endDate) return '';
+        return `${startDate} - ${endDate}`;
+    };
 
-const TemplateD = ({ resumeData, accentColor }) => { // Accept accentColor for titles
-    const {
-        personalInfo = {},
-        summary = '',
-        experience = [],
-        education = [],
-        projects = [],
-        skills = []
-    } = resumeData || {};
+    const formatLink = (url) => url ? url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : '';
 
-    const isGithub = (url) => url && (url.includes('github.com'));
-    const githubUrl = isGithub(personalInfo.website) ? personalInfo.website : null;
+    const formatLinkedIn = (url) => {
+        const match = url?.match(/in\/([^/]+)/);
+        return match ? `in/${match[1]}` : formatLink(url);
+    };
+    // Helper to make GitHub look clean (e.g. "github.com/username" or just "username")
+    const formatGitHub = (url) => {
+        // Tries to grab just the username if it's a standard github url
+        const match = url?.match(/github\.com\/([^/]+)/);
+        return match ? `github.com/${match[1]}` : formatLink(url);
+    };
+
+    const renderList = (desc) => {
+        if (!desc) return null;
+        const lines = desc.split(/\n|•/).filter(line => line.trim().length > 0);
+        return (
+            <ul className="template-d-list">
+                {lines.map((line, idx) => <li key={idx}>{line.trim()}</li>)}
+            </ul>
+        );
+    };
+
+    // =========================================================================
+    // 3. DEFINE BLOCKS (Matches "Adam Gregory" Design)
+    // =========================================================================
+
+    const ExperienceBlock = data?.experience?.length > 0 && (
+        <div className="template-d-section">
+            <div className="template-d-section-title">WORK EXPERIENCE</div>
+            {data.experience.map((exp, i) => (
+                <div key={i} className="template-d-item">
+                    <div className="template-d-job-title">
+                        {exp.title}
+                    </div>
+                    <div className="template-d-company">
+                        {exp.company}
+                        {exp.location ? `, ${exp.location}` : ''}
+                    </div>
+                    <div className="template-d-date">
+                        {formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking)}
+                    </div>
+                    {renderList(exp.description)}
+                </div>
+            ))}
+        </div>
+    );
+
+    const ProjectsBlock = data?.projects?.length > 0 && (
+        <div className="template-d-section">
+            <div className="template-d-section-title">PROJECTS</div>
+            {data.projects.map((proj, i) => (
+                <div key={i} className="template-d-item">
+                    <div className="template-d-job-title">
+                        {proj.name}
+                    </div>
+                    <div className="template-d-company">
+                        {proj.type}
+                    </div>
+                    <div className="template-d-date">
+                        {formatDateRange(proj.startDate, proj.endDate, proj.currentlyWorking)}
+                    </div>
+                    {renderList(proj.description)}
+                </div>
+            ))}
+        </div>
+    );
+
+    const EducationBlock = data?.education?.length > 0 && (
+        <div className="template-d-section">
+            <div className="template-d-section-title">EDUCATIONAL HISTORY</div>
+            {data.education.map((edu, i) => (
+                <div key={i} className="template-d-item">
+                    <div className="template-d-job-title">
+                        {edu.degree}
+                    </div>
+                    <div className="template-d-company">
+                        {edu.institutionName}
+                    </div>
+                    <div className="template-d-date">
+                        {formatDate(edu.date)}
+                    </div>
+                    {edu.fieldOfStudy && <div>Major: {edu.fieldOfStudy}</div>}
+                    {edu.gpa && <div>GPA: {edu.gpa}</div>}
+                </div>
+            ))}
+        </div>
+    );
+
+    // SKILLS: 2-Column Split
+    const SkillsBlock = data?.skills?.length > 0 && (() => {
+        const mid = Math.ceil(data.skills.length / 2);
+        const col1 = data.skills.slice(0, mid);
+        const col2 = data.skills.slice(mid);
+
+        return (
+            <div className="template-d-section">
+                <div className="template-d-section-title">RELEVANT SKILLS</div>
+                <div className="template-d-skills-container">
+                    <div className="template-d-skill-col">
+                        <ul className="template-d-skill-list">
+                            {col1.map((skill, idx) => <li key={idx}>{skill.name}</li>)}
+                        </ul>
+                    </div>
+                    <div className="template-d-skill-col">
+                        <ul className="template-d-skill-list">
+                            {col2.map((skill, idx) => <li key={idx}>{skill.name}</li>)}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        );
+    })();
+
+    const CertificatesBlock = data?.certificates?.length > 0 && (
+        <div className="template-d-section">
+            <div className="template-d-section-title">AWARDS & CERTIFICATIONS</div>
+            {data.certificates.map((cert, i) => (
+                <div key={i} className="template-d-item">
+                    <div className="template-d-job-title">
+                        {cert.name}
+                    </div>
+                    <div className="template-d-company">
+                        {cert.issuer}
+                    </div>
+                    <div className="template-d-date">
+                        {formatDate(cert.date)}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
+    // =========================================================================
+    // 4. ORDER LOGIC
+    // =========================================================================
+
+    let LayoutContent;
+
+    if (targetProfile === 'intern' || targetProfile === 'fresher') {
+        LayoutContent = <>{EducationBlock}{SkillsBlock}{ProjectsBlock}{ExperienceBlock}{CertificatesBlock}</>;
+    } 
+    else if (targetProfile === 'technical') {
+        LayoutContent = <>{SkillsBlock}{ProjectsBlock}{ExperienceBlock}{EducationBlock}{CertificatesBlock}</>;
+    } else if (targetProfile === 'switch') {
+         LayoutContent = (
+            <>
+                {SkillsBlock}
+                {ProjectsBlock}
+                {ExperienceBlock}
+                {CertificatesBlock}
+                {EducationBlock}
+            </>
+        );
+    }
+    else {
+        // Default / Experienced
+        LayoutContent = <>{ExperienceBlock}{ProjectsBlock}{SkillsBlock}{EducationBlock}{CertificatesBlock}</>;
+    }
+
+    // =========================================================================
+    // 5. RENDER
+    // =========================================================================
 
     return (
-        // Set main container class and CSS variable
-        <div className="preview-container template-minimal" style={{ '--accent-color': accentColor }}>
-
-            {/* --- Header Section --- */}
-            <div className="minimal-header">
-                 <Title level={1} className="minimal-name">{personalInfo.name || 'Your Name'}</Title>
-                 {/* Contact Info (single line below name) */}
-                 <div className="contact-info minimal-contact-info">
-                    {personalInfo.email && <MinimalContactItem icon={<MailOutlined />} text={personalInfo.email} />}
-                    {personalInfo.phone && <MinimalContactItem icon={<PhoneOutlined />} text={personalInfo.phone} />}
-                    {personalInfo.location && <MinimalContactItem icon={<EnvironmentOutlined />} text={personalInfo.location} />}
-                    {personalInfo.linkedin && <MinimalContactItem icon={<LinkedinOutlined />} text={personalInfo.linkedin} />}
-                    {githubUrl && <MinimalContactItem icon={<GithubOutlined />} text={githubUrl} />}
-                    {personalInfo.website && !githubUrl && <MinimalContactItem icon={<GlobalOutlined />} text={personalInfo.website} />}
-                 </div>
-                 {/* No divider needed here */}
-            </div>
-            {/* ------------------- */}
-
-            {/* --- Main Content Area (Single Column) --- */}
-            <div className="minimal-content">
-                {/* Summary Section */}
-                {summary && (
-                    <div className="minimal-section">
-                        {/* No title for summary in this template */}
-                        <Paragraph className="minimal-paragraph">{summary}</Paragraph>
+        <div className="template-d-container">
+            {/* Header */}
+            <header className="template-d-header">
+                <div className="template-d-header-left">
+                    <div className="template-d-name">
+                        {data?.personalInfo?.name || "ADAM GREGORY"}
                     </div>
-                )}
-
-                {/* Experience Section */}
-                 {experience.length > 0 && (
-                     <div className="minimal-section">
-                        <Title level={4} className="minimal-section-title">Experience</Title>
-                        {experience
-                            .slice()
-                            .sort((a, b) => { /* Sort logic */ })
-                            .map((job, index) => (
-                            <div key={index} className="minimal-item">
-                                <Row justify="space-between" align="top">
-                                    <Col flex="auto">
-                                        <Title level={5} className="minimal-item-title">{job.title || 'Job Title'}</Title>
-                                        <Text className="minimal-item-subtitle">{job.company || 'Company Name'}</Text>
-                                    </Col>
-                                    <Col flex="none">
-                                        <Text className="minimal-item-date">
-                                            {job.startDate ? dayjs(job.startDate).format('MMM YYYY') : ''} - {job.currentlyWorking ? 'Present' : (job.endDate ? dayjs(job.endDate).format('MMM YYYY') : '')}
-                                        </Text>
-                                    </Col>
-                                </Row>
-                                <Paragraph className="minimal-item-description">
-                                    {job.description || 'Description...'}
-                                </Paragraph>
-                            </div>
-                        ))}
-                    </div>
-                 )}
-
-                {/* Projects Section */}
-                {projects.length > 0 && (
-                    <div className="minimal-section">
-                        <Title level={4} className="minimal-section-title">Projects</Title>
-                        {projects.map((project, index) => (
-                            <div key={index} className="minimal-item">
-                                <Row justify="space-between" align="top">
-                                    <Col flex="auto">
-                                        <Title level={5} className="minimal-item-title">{project.name || 'Project Name'}</Title>
-                                        {project.type && <Text className="minimal-item-subtitle">{project.type}</Text>}
-                                    </Col>
-                                </Row>
-                                <Paragraph className="minimal-item-description">
-                                    {project.description || 'Project description...'}
-                                </Paragraph>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-
-                 {/* Education Section */}
-                 {education.length > 0 && (
-                     <div className="minimal-section">
-                        <Title level={4} className="minimal-section-title">Education</Title>
-                         {education
-                            .slice()
-                            .sort((a, b) => parseSortDate(b.date) - parseSortDate(a.date))
-                            .map((school, index) => (
-                             <div key={index} className="minimal-item">
-                                 <Row justify="space-between" align="top">
-                                    <Col flex="auto">
-                                        <Title level={5} className="minimal-item-title">{school.degree}{school.fieldOfStudy ? ` in ${school.fieldOfStudy}` : '' || 'Degree'}</Title>
-                                        <Text className="minimal-item-subtitle">{school.institutionName || 'Institution Name'}</Text>
-                                        {school.gpa && <Paragraph className="minimal-item-gpa">GPA: {school.gpa}</Paragraph>}
-                                    </Col>
-                                    <Col flex="none">
-                                        <Text className="minimal-item-date">{school.date ? dayjs(school.date).format('MMM YYYY') : ''}</Text>
-                                    </Col>
-                                 </Row>
-                             </div>
-                         ))}
-                     </div>
-                 )}
-
-
-                  {/* Skills Section */}
-                  {skills.length > 0 && (
-                      <div className="minimal-section">
-                        <Title level={4} className="minimal-section-title">Skills</Title>
-                        <div className="minimal-skills-list">
-                            {skills.map((skill, index) => (
-                                skill.name && (
-                                    <React.Fragment key={index}>
-                                        <Text>{skill.name}</Text>
-                                        {index < skills.length - 1 && <Text className="skill-separator"> • </Text>}
-                                    </React.Fragment>
-                                )
-                            ))}
+                    {data?.personalInfo?.profession && (
+                        <div className="template-d-role">
+                            {data.personalInfo.profession}
                         </div>
-                      </div>
-                  )}
-            </div> {/* End minimal-content */}
+                    )}
+                </div>
+
+                <div className="template-d-header-right">
+                    {data?.personalInfo?.phone && <div>{data.personalInfo.phone}</div>}
+                    {data?.personalInfo?.email && <div><MailFilled style={{ fontSize: '11px' }} /> <a href={`mailto:${data.personalInfo.email}`}>{data.personalInfo.email}</a></div>}
+                    {data?.personalInfo?.location && <div>{data.personalInfo.location}</div>}
+                    
+                    {data?.personalInfo?.linkedin && (
+    <div>
+        <LinkedinFilled style={{ color: themeColor, marginRight: '5px' }} />
+        <a href={ensureUrl(data.personalInfo.linkedin)} target="_blank" rel="noreferrer">
+            {formatLinkedIn(data.personalInfo.linkedin)}
+        </a>
+    </div>
+)}
+ {data?.personalInfo?.website && (
+    <div>
+        <GithubFilled style={{ color: themeColor, marginRight: '5px' }} />
+        <a href={ensureUrl(data.personalInfo.website)} target="_blank" rel="noreferrer">
+            {formatLink(data.personalInfo.website)}
+        </a>
+    </div>
+)}
+                </div>
+            </header>
+
+            {/* Summary (Bar Style) */}
+            {data?.summary && (
+                <div className="template-d-summary-container">
+                    {data.summary}
+                </div>
+            )}
+
+            {/* Dynamic Content */}
+            {LayoutContent}
         </div>
     );
 };

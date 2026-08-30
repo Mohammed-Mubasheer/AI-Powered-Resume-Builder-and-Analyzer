@@ -6,7 +6,9 @@ from .views import (
     RegisterView,
     EnhanceWithAIView,
     ResumeViewSet,
-    ResumeAnalysisView # Make sure this is imported
+    ResumeAnalysisView,
+    DownloadRoadmapView,
+    DownloadReportView
 )
 
 router = DefaultRouter()
@@ -17,7 +19,7 @@ urlpatterns = [
     path('hello/', HelloApiView.as_view(), name='hello'),
     path('register/', RegisterView.as_view(), name='register'),
     path('enhance/', EnhanceWithAIView.as_view(), name='enhance'),
-    # --- Verify this line ---
-    path('analyze/', ResumeAnalysisView.as_view(), name='analyze_resume'),
-    # -----------------------
+    path('analyze/', ResumeAnalysisView.as_view(), name='analyze'),
+    path('download/roadmap/', DownloadRoadmapView.as_view(), name='download_roadmap'),
+    path('download/report/', DownloadReportView.as_view(), name='download_report'),
 ]

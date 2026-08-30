@@ -5,7 +5,17 @@
 backend/venv/
 backend/__pycache__/
 backend/db.sqlite3
+backend-env/
+__pycache__/
 *.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.python-version
+.venv/
+.vscode/
+.idea/
 .env
 
 # --- Frontend Ignores ---
@@ -13,3 +23,19 @@ frontend/node_modules/
 frontend/build/
 frontend/.env
 npm-debug.log
+
+# --- Root / monorepo ignores ---
+node_modules/
+build/
+dist/
+venv/
+
+# --- Runtime/user-generated content (do not commit) ---
+media/
+uploads/
+resumes/
+temp/
+db.sqlite3
+
+# --- Misc local tools that were accidentally placed under frontend/public ---
+frontend/public/Analyzer/

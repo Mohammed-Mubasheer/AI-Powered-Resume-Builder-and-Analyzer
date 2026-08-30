@@ -1,244 +1,484 @@
-// frontend/src/pages/BuilderPage.js
-import React, { useState, useContext } from 'react';
-// NEW: Import List component
+// src/pages/BuilderPage.js
+import React, { useState, useContext, useRef, useEffect, useCallback } from 'react';
 import {
-    Layout, Row, Col, Typography, Button, Space, Form, Radio, message, Modal, Card, Popover, Input, List
+    Layout, Button, Space, Form, Modal, Input, List, Popover, App, Typography, Spin, Select, Tooltip
 } from 'antd';
-// NEW: Import CheckOutlined
 import {
-    ArrowLeftOutlined, DownloadOutlined, EyeOutlined, BgColorsOutlined, UndoOutlined, CheckOutlined
+    ArrowLeftOutlined, DownloadOutlined, EyeOutlined, CheckOutlined, 
+    ShareAltOutlined, PlusOutlined, DeleteOutlined, EditOutlined, 
+    FileTextOutlined, ExclamationCircleOutlined, HomeOutlined, SaveOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import ResumeForm from '../components/ResumeForm';
 import ResumePreview from '../components/ResumePreview';
-import BuilderStartOptions from '../components/BuilderStartOptions';
 import axios from 'axios';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import dayjs from 'dayjs';
-import { SketchPicker } from 'react-color';
+import './BuilderPage.css'; // Import the new Premium Styles
 
 const { Header, Content } = Layout;
-const { Title, Text, Paragraph } = Typography; // Added Paragraph
+const { Text } = Typography;
 
-const stepTitles = ['Personal Information', 'Professional Summary', 'Professional Experience', 'Education', 'Projects', 'Skills'];
+// --- Constants ---
+const stepTitles = ['Personal Information', 'Professional Summary', 'Professional Experience', 'Education', 'Projects', 'Skills', 'Certifications'];
+
 const initialData = {
-    personalInfo: {
-        name: "",
-        email: "",
-        phone: "",
-        location: "",
-        profession: "",
-        linkedin: "",
-        website: "",
-        imageUrl: null
-    },
-    summary: "",
-    experience: [],
-    education: [],
-    skills: [],
-    projects: []
+    personalInfo: { name: "", email: "", phone: "", location: "", profession: "", linkedin: "", website: "" },
+    summary: "", experience: [], education: [], skills: [], projects: [], certificates: []
 };
 
-// MODIFIED: Use descriptive IDs and add descriptions for template options
 const templateOptions = [
-  { id: 'classic', name: 'Classic', description: 'A clean, traditional resume format with clear sections and professional typography.' },
-  { id: 'modern', name: 'Modern', description: 'Sleek design with strategic use of color and modern font choices.' },
-  { id: 'minimalImage', name: 'Minimal Image', description: 'Minimal design with a single image and clean typography.' },
-  { id: 'minimal', name: 'Minimal', description: 'Ultra-clean design that puts your content front and center.' },
+  { id: 'classic', name: 'Classic Professional', description: 'Clean & Traditional' },
+  { id: 'modern', name: 'Modern Creative', description: 'Sleek & Bold' },
+  { id: 'minimalImage', name: 'Elegant Executive', description: 'Image Focused' },
+  { id: 'minimal', name: 'Bold Structure', description: 'Ultra Clean' },
+  { id: 'New', name: 'Designer Sidebar', description: 'Compact & Structured' },
 ];
-// -----------------------------------------------------------------------
 
-const DEFAULT_ACCENT_COLOR = '#3b82f6';
+const profileOptions = [
+    { id: 'intern', label: 'Internship', desc: 'Education & Projects first' },
+    { id: 'fresher', label: 'Fresher', desc: 'Skills & Education focused' },
+    { id: 'experienced', label: 'Experienced', desc: 'Work History first' },
+    { id: 'technical', label: 'Technical / Dev', desc: 'Skills & Projects focused' },
+    { id: 'switch', label: 'Career Switcher', desc: 'Summary & Skills focused' }
+];
 
-const BuilderPage = () => {
+// --- Main Content Component ---
+const BuilderPageContent = () => {
     const navigate = useNavigate();
-    const { authTokens } = useContext(AuthContext);
+    const { authTokens, logoutUser } = useContext(AuthContext);
     const [form] = Form.useForm();
+    const resumeRef = useRef(null);
+    
+    const { message, modal } = App.useApp(); 
+
+    // --- State Variables ---
+    const [showEditor, setShowEditor] = useState(false); 
+    const [resumesList, setResumesList] = useState([]);  
+    const [listLoading, setListLoading] = useState(false);
     const [resumeId, setResumeId] = useState(null);
     const [resumeData, setResumeData] = useState(initialData);
     const [currentStep, setCurrentStep] = useState(0);
-    const [templateId, setTemplateId] = useState('classic'); // Defaulting to 'classic'
-    // REMOVED: isTemplateModalVisible state removed
-    const [accentColor, setAccentColor] = useState(DEFAULT_ACCENT_COLOR);
-    const [accentPopoverVisible, setAccentPopoverVisible] = useState(false); // Renamed state
-    const [showEditor, setShowEditor] = useState(false);
+    const [templateId, setTemplateId] = useState('classic');
+    const [isPublic, setIsPublic] = useState(false);
+    
+    // UI States
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
     const [newResumeTitle, setNewResumeTitle] = useState("My Resume");
-
-    // NEW: State for Template Popover visibility
     const [templatePopoverVisible, setTemplatePopoverVisible] = useState(false);
+    const [targetProfile, setTargetProfile] = useState('fresher');
 
-    const handleFormChange = (changedValues, allValues) => { setResumeData(allValues); };
+    // Helper to restore date objects from API strings
+    const restoreDates = (data) => {
+        const newData = { ...data };
+        const toDayjs = (dateStr) => (dateStr ? dayjs(dateStr) : null);
 
-    // Full handleSave function
-    const handleSave = async () => {
-        message.loading({ content: 'Saving...', key: 'save' });
-        const currentResumeData = form.getFieldsValue();
-        const payload = {
-            title: resumeId ? (currentResumeData.personalInfo.name + "'s Resume") : newResumeTitle,
-            resume_data: currentResumeData
-        };
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + String(authTokens.access)
-        };
+        if (newData.experience) {
+            newData.experience = newData.experience.map(item => ({
+                ...item,
+                startDate: toDayjs(item.startDate),
+                endDate: toDayjs(item.endDate),
+            }));
+        }
+        if (newData.projects) {
+            newData.projects = newData.projects.map(item => ({
+                ...item,
+                startDate: toDayjs(item.startDate),
+                endDate: toDayjs(item.endDate),
+            }));
+        }
+        if (newData.education) {
+            newData.education = newData.education.map(item => ({
+                ...item,
+                date: toDayjs(item.date),
+            }));
+        }
+        if (newData.certificates) {
+            newData.certificates = newData.certificates.map(item => ({
+                ...item,
+                date: toDayjs(item.date),
+            }));
+        }
+        return newData;
+    };
+
+    // --- 2. API FUNCTIONS ---
+    const fetchResumesList = useCallback(async () => {
+        setListLoading(true);
         try {
-            let response;
-            if (resumeId) {
-                response = await axios.put(`http://127.0.0.1:8000/api/resumes/${resumeId}/`, payload, { headers });
-            } else {
-                response = await axios.post('http://127.0.0.1:8000/api/resumes/', payload, { headers });
-                setResumeId(response.data.id);
-            }
-            message.success({ content: 'Saved successfully!', key: 'save', duration: 2 });
+            const response = await axios.get('http://127.0.0.1:8000/api/resumes/', { headers: { 'Authorization': `Bearer ${authTokens?.access}` } });
+            setResumesList(response.data);
+        } catch (error) { console.error(error); } finally { setListLoading(false); }
+    }, [authTokens]);
+
+    const fetchResumeAndRestore = useCallback(async (id) => {
+        const hide = message.loading('Loading...', 0);
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/api/resumes/${id}/`, { headers: { 'Authorization': `Bearer ${authTokens?.access}` } });
+            let fetchedData = response.data.resume_data || initialData;
+            fetchedData = restoreDates(fetchedData); 
+            if (fetchedData.targetProfile) setTargetProfile(fetchedData.targetProfile);
+            else setTargetProfile('fresher');
+            setResumeData(fetchedData);
+            form.setFieldsValue(fetchedData);
+            setResumeId(id);
+            setNewResumeTitle(response.data.title);
+            setIsPublic(response.data.is_public);
+            setShowEditor(true); 
+            hide();
+        } catch (error) { hide(); console.error(error); }
+    }, [authTokens, form, message]);
+
+    // --- STABILIZED USE EFFECT ---
+    useEffect(() => {
+        const savedId = localStorage.getItem('currentResumeId');
+        if (savedId) {
+            fetchResumeAndRestore(savedId);
+        } else {
+            fetchResumesList();
+            setShowEditor(false); 
+        }
+        // Depend only on the token string, not the object
+    }, [authTokens?.access, fetchResumeAndRestore, fetchResumesList]);
+
+    const handleDelete = async (id) => {
+        message.loading({ content: 'Deleting...', key: 'delete' });
+        try {
+            await axios.delete(`http://127.0.0.1:8000/api/resumes/${id}/`, {
+                headers: { 'Authorization': `Bearer ${authTokens?.access}` }
+            });
+            message.success({ content: 'Resume deleted', key: 'delete' });
+            setResumesList(prev => prev.filter(r => r.id !== id));
         } catch (error) {
-            console.error('Save error:', error);
-            message.error({ content: 'Failed to save!', key: 'save', duration: 2 });
+            message.error({ content: 'Delete failed', key: 'delete' });
         }
     };
 
-    // REMOVED: showTemplateModal function removed
-
-    // MODIFIED: handleSelectTemplate now also closes the Popover
-    const handleSelectTemplate = (id) => {
-        setTemplateId(id);
-        setTemplatePopoverVisible(false); // Close template popover on selection
+    const showDeleteConfirm = (id, title) => {
+        modal.confirm({
+            title: 'Delete Resume?',
+            icon: <ExclamationCircleOutlined />,
+            content: `Are you sure you want to delete "${title || 'this resume'}"?`,
+            okText: 'Yes, Delete',
+            okType: 'danger',
+            cancelText: 'Cancel',
+            centered: true,
+            maskClosable: true,
+            onOk: async () => { await handleDelete(id); },
+        });
     };
 
-    const handleColorChange = (color) => { setAccentColor(color.hex); };
-    const resetColor = () => { setAccentColor(DEFAULT_ACCENT_COLOR); setAccentPopoverVisible(false); }; // Close popover
-    // MODIFIED: Renamed handler for accent popover visibility
-    const handleAccentVisibleChange = (visible) => { setAccentPopoverVisible(visible); };
+    const handleSave = async (shouldRedirect = false) => {
+        const MSG_KEY = 'save_status';
+        message.loading({ content: 'Saving...', key: MSG_KEY });
 
-    const colorOptions = ['#3b82f6', '#10b981', '#ef4444', '#f97316', '#8b5cf6'];
-    // Full colorPickerContent variable
-    const colorPickerContent = (
-        <div>
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                {colorOptions.map(color => ( <div key={color} style={{ width: '24px', height: '24px', borderRadius: '50%', background: color, cursor: 'pointer', border: accentColor === color ? '2px solid black' : '1px solid #ccc' }} onClick={() => { setAccentColor(color); setAccentPopoverVisible(false); }} /> ))}
-            </div>
-             <Button icon={<UndoOutlined />} onClick={resetColor} size="small" block> Reset to Default </Button>
-            {/* Optional SketchPicker
-             <SketchPicker color={accentColor} onChangeComplete={handleColorChange} presetColors={[]} disableAlpha width="220px" />
-             <Button onClick={() => setAccentPopoverVisible(false)} size="small" style={{marginTop: '10px'}} block>Done</Button>
-            */}
-        </div>
-    );
+        const currentData = form.getFieldsValue();
+        const finalData = { 
+            ...currentData, 
+            targetProfile: targetProfile 
+        };
 
+        const payload = {
+            title: resumeId ? (currentData.personalInfo?.name + "'s Resume") : newResumeTitle,
+            resume_data: finalData,
+            is_public: isPublic
+        };
+        const headers = { 'Authorization': `Bearer ${authTokens?.access}` };
 
-    const showCreateModal = () => { setNewResumeTitle("My Resume"); setIsCreateModalVisible(true); };
-    // Full handleConfirmCreate function
+        try {
+            let savedId = resumeId;
+            if (resumeId) {
+                await axios.put(`http://127.0.0.1:8000/api/resumes/${resumeId}/`, payload, { headers });
+            } else {
+                const res = await axios.post('http://127.0.0.1:8000/api/resumes/', payload, { headers });
+                savedId = res.data.id;
+                setResumeId(savedId);
+                localStorage.setItem('currentResumeId', savedId);
+            }
+            
+            message.success({ content: 'Saved successfully!', key: MSG_KEY, duration: 2 });
+            
+            if (shouldRedirect) {
+                localStorage.removeItem('currentResumeId'); 
+                setShowEditor(false); 
+                setResumeId(null); 
+                setResumeData(initialData); 
+                form.resetFields();
+                fetchResumesList(); 
+            }
+
+        } catch (error) {
+            message.error({ content: 'Failed to save.', key: MSG_KEY });
+        }
+    };
+
+    // --- UI HANDLERS ---
+    const handleBackToDashboard = () => {
+        setShowEditor(false);
+        setResumeId(null);
+        setResumeData(initialData);
+        form.resetFields();
+        localStorage.removeItem('currentResumeId');
+        fetchResumesList(); 
+    };
+
+    const handleCreateNewClick = () => {
+        setNewResumeTitle("My Resume");
+        setTargetProfile('fresher');
+        setIsCreateModalVisible(true);
+    };
+
     const handleConfirmCreate = () => {
         setIsCreateModalVisible(false);
-        const dataWithTitle = { ...initialData };
-        form.setFieldsValue(dataWithTitle);
-        setResumeData(dataWithTitle);
         setResumeId(null);
+        localStorage.removeItem('currentResumeId');
+        form.resetFields();
+        setResumeData(JSON.parse(JSON.stringify(initialData)));
         setCurrentStep(0);
-        setShowEditor(true);
+        setTargetProfile('fresher'); 
+        setShowEditor(true); 
     };
-    // Full handleCancelCreate function
-    const handleCancelCreate = () => { setIsCreateModalVisible(false); };
 
-    // NEW: Template Popover Content using Ant Design List
+    const handleEditClick = (id) => {
+        localStorage.setItem('currentResumeId', id);
+        fetchResumeAndRestore(id);
+    };
+
+    // --- MEMOIZED HANDLER (Crucial Fix) ---
+    const handleFormChange = useCallback((changedValues, allValues) => { 
+        setResumeData(allValues); 
+    }, []);
+
+    const handleToggleVisibility = () => { setIsPublic(!isPublic); message.info(`Resume is now ${!isPublic ? 'Public' : 'Private'}`); };
+    
+    // Replace the old handleDownload with this:
+    const handleDownload = () => {
+         // This triggers the browser's native print window.
+         // Users just select "Save as PDF" as the destination.
+         window.print();
+    };
+
+    const handleShare = async () => { 
+        const element = resumeRef.current;
+        if (!element) return;
+        if (!navigator.canShare) return message.error("Browser doesn't support direct sharing");
+        try {
+            const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            const blob = pdf.output('blob');
+            const file = new File([blob], "resume.pdf", { type: 'application/pdf' });
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title: 'My Resume' });
+            }
+        } catch(e) { console.error(e); }
+    };
+
+    const handleSelectTemplate = (id) => { setTemplateId(id); setTemplatePopoverVisible(false); };
+
     const templateSelectionContent = (
-        <List
-            dataSource={templateOptions}
-            renderItem={item => (
-                <List.Item
-                    onClick={() => handleSelectTemplate(item.id)}
-                    style={{ cursor: 'pointer', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}
-                    className={templateId === item.id ? 'template-selected' : 'template-option'}
-                >
-                    <List.Item.Meta
-                        title={<Text strong style={{fontSize: '14px'}}>{item.name}</Text>}
-                        description={<Paragraph style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>{item.description}</Paragraph>}
-                    />
-                    {templateId === item.id && <CheckOutlined style={{ color: '#3b82f6', fontSize: '16px' }} />}
-                </List.Item>
-            )}
-            style={{ width: 300, padding: 0 }}
-            size="small"
-        />
+        <List dataSource={templateOptions} renderItem={item => (
+            <List.Item onClick={() => handleSelectTemplate(item.id)} style={{ cursor: 'pointer', padding: '10px' }}>
+                <List.Item.Meta title={item.name} description={item.description} />
+                {templateId === item.id && <CheckOutlined style={{ color: '#3b82f6' }} />}
+            </List.Item>
+        )} style={{ width: 280 }} />
     );
-    // ----------------------------------------------------
 
-
+    // --- RENDER ---
     return (
-        <Layout style={{ minHeight: '100vh', background: '#f9f9f9' }}>
-             <Header style={{ background: '#fff', padding: '0 24px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                 <Space> {/* Left Side */}
-                    {showEditor ? ( <Button icon={<ArrowLeftOutlined />} onClick={() => setShowEditor(false)}> Back to Options </Button> ) : ( <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')}> Back to Dashboard </Button> )}
-                 </Space>
-                 {showEditor && (
-                    <Space>
-                        <Radio.Group value="controls" buttonStyle="solid">
-                             {/* MODIFIED: Template Button now uses Popover */}
-                            <Popover
-                                content={templateSelectionContent}
-                                trigger="click"
-                                placement="bottomLeft"
-                                open={templatePopoverVisible}
-                                onOpenChange={setTemplatePopoverVisible}
-                                overlayClassName="template-popover"
-                            >
-                                <Radio.Button value="template" style={{ borderRadius: '6px 0 0 6px' }}> Template </Radio.Button>
-                            </Popover>
-                             <Popover
-                                content={colorPickerContent}
-                                title="Select Accent Color"
-                                trigger="click"
-                                open={accentPopoverVisible} // Renamed state
-                                onOpenChange={handleAccentVisibleChange} // Renamed handler
-                             >
-                                <Radio.Button value="accent" style={{ borderRadius: '0 6px 6px 0' }}> <BgColorsOutlined /> Accent </Radio.Button>
-                             </Popover>
-                        </Radio.Group>
-                        {/* Next Button is handled inside ResumeForm */}
-                    </Space>
-                 )}
-                <Space> {/* Right Side */}
-                     <Button icon={<EyeOutlined />} style={{ borderRadius: '6px' }}>Private</Button>
-                     <Button type="primary" icon={<DownloadOutlined />} style={{ borderRadius: '6px', background: '#22c55e' }}> Download </Button>
-                 </Space>
-            </Header>
+        <Layout className="builder-layout">
+            <Header className="builder-header">
+    <Space>
+        {!showEditor ? (
+            <Button 
+                type="text" 
+                icon={<HomeOutlined />} 
+                onClick={() => navigate('/')} 
+                style={{ fontSize: '16px', fontWeight: '600' }}
+            >
+                Back to Home
+            </Button>
+        ) : (
+            <Button 
+                type="text" 
+                icon={<ArrowLeftOutlined />} 
+                onClick={handleBackToDashboard}
+                style={{ fontSize: '15px' }}
+            >
+                Dashboard
+            </Button>
+        )}
+    </Space>
 
-            <Content style={{ padding: '24px' }}>
+    {showEditor && (
+        <Space size="small">
+            {/* 1. TARGET PROFILE DROPDOWN (Dark Theme) */}
+            <Select 
+                value={targetProfile} 
+                onChange={setTargetProfile} 
+                style={{ width: 160 }} 
+                className="header-select"
+                options={profileOptions.map(p => ({ label: p.label, value: p.id }))} 
+                placeholder="Target Profile"
+                dropdownStyle={{ background: '#1e293b', border: '1px solid #334155' }}
+            />
+
+            {/* 2. CHANGE TEMPLATE (Ghost Button) */}
+            <Popover content={templateSelectionContent} trigger="click" open={templatePopoverVisible} onOpenChange={setTemplatePopoverVisible}>
+                <Button ghost>Change Template</Button>
+            </Popover>
+            
+            {/* 3. VISIBILITY TOGGLE (Text Button) */}
+            <Tooltip title={isPublic ? "Public" : "Private"}>
+                <Button 
+                    type="text"
+                    icon={<EyeOutlined />} 
+                    style={{ color: isPublic ? '#a5b4fc' : 'rgba(255,255,255,0.7)' }} 
+                    onClick={handleToggleVisibility}
+                > 
+                    {isPublic ? 'Public' : 'Private'} 
+                </Button>
+            </Tooltip>
+
+            {isPublic && ( 
+                <Button type="text" icon={<ShareAltOutlined />} onClick={handleShare} /> 
+            )}
+
+            {/* 4. SAVE BUTTON (Ghost) */}
+            <Button icon={<SaveOutlined />} onClick={() => handleSave(true)} ghost>
+                Save Draft
+            </Button>
+            
+            {/* 5. DOWNLOAD BUTTON (Updated) */}
+<Button 
+    type="primary" 
+    icon={<DownloadOutlined />} 
+    className="premium-download-btn" /* <--- ADD THIS CLASS */
+    onClick={handleDownload}
+>
+    Download
+</Button>
+        </Space>
+    )}
+    
+    {!showEditor && ( 
+        <Button type="text" onClick={logoutUser} icon={<span style={{fontSize:'16px'}}>⏻</span>}>
+            Logout
+        </Button> 
+    )}
+</Header>
+
+            <Content>
                 {!showEditor ? (
-                    <BuilderStartOptions showCreateModal={showCreateModal} />
+                    /* === DASHBOARD VIEW === */
+                    <>
+                        <div className="dashboard-hero">
+                            <h1>My Resumes</h1>
+                            <p>Manage your drafts, create new versions, and get hired faster.</p>
+                        </div>
+
+                        <div className="dashboard-container">
+                            {listLoading ? <Spin size="large" style={{ display: 'block', margin: '100px auto' }} /> : (
+                                <div className="resume-grid">
+                                    {/* Create New Card */}
+                                    <div className="dashboard-card create-card" onClick={handleCreateNewClick}>
+                                        <div className="create-icon-wrapper">
+                                            <PlusOutlined />
+                                        </div>
+                                        <Text strong style={{ fontSize: '16px', color: '#1e293b' }}>Create New Resume</Text>
+                                        <Text type="secondary">Start from scratch</Text>
+                                    </div>
+
+                                    {/* Existing Resumes */}
+                                    {resumesList.map(resume => (
+                                        <div key={resume.id} className="dashboard-card" onClick={() => handleEditClick(resume.id)}>
+                                            <div className="resume-actions">
+                                                <div className="action-icon" onClick={(e) => { e.stopPropagation(); handleEditClick(resume.id); }}>
+                                                    <EditOutlined />
+                                                </div>
+                                                <div className="action-icon delete" onClick={(e) => { e.stopPropagation(); showDeleteConfirm(resume.id, resume.title); }}>
+                                                    <DeleteOutlined />
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="resume-card-icon">
+                                                <FileTextOutlined />
+                                            </div>
+                                            
+                                            <div style={{ width: '100%' }}>
+                                                <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1f2937', marginBottom: '4px' }}>
+                                                    {resume.title || "Untitled Resume"}
+                                                </div>
+                                                <div style={{ fontSize: '0.85rem', color: '#9ca3af' }}>
+                                                    Updated {dayjs(resume.updated_at).format('MMM D, YYYY')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </>
                 ) : (
-                    <Row gutter={[24, 24]} style={{ height: '100%' }}>
-                        <Col xs={24} md={10} lg={10}>
-                            <ResumeForm
-                                formInstance={form}
-                                onFormChange={handleFormChange}
-                                initialData={initialData}
-                                authTokens={authTokens}
-                                currentStep={currentStep}
-                                setCurrentStep={setCurrentStep}
-                                stepTitles={stepTitles}
-                                onSave={handleSave}
-                            />
-                        </Col>
-                        <Col xs={24} md={14} lg={14} style={{ background: '#fff', padding: '24px', borderRadius: '8px', height: '85vh', overflowY: 'auto' }}>
-                            <ResumePreview
-                                resumeData={resumeData}
-                                templateId={templateId} // Pass current templateId
-                                accentColor={accentColor}
-                             />
-                        </Col>
-                    </Row>
+                    /* === EDITOR VIEW === */
+<div className="editor-container">
+    {/* LEFT SIDE: FORM */}
+    <div className="editor-form-panel">
+         <ResumeForm 
+            formInstance={form} 
+            onFormChange={handleFormChange} 
+            authTokens={authTokens} 
+            onSave={() => handleSave(false)} 
+            currentStep={currentStep} 
+            setCurrentStep={setCurrentStep} 
+            stepTitles={stepTitles} 
+        />
+    </div>
+    
+    {/* RIGHT SIDE: DARK PREVIEW */}
+    <div className="editor-preview-panel">
+        {/* Wrapper Div to create the "Paper" effect */}
+        <div className="resume-paper-shadow">
+            <ResumePreview 
+                ref={resumeRef} 
+                resumeData={resumeData} 
+                templateId={templateId} 
+                targetProfile={targetProfile}
+            />
+        </div>
+    </div>
+</div>
                 )}
             </Content>
-
-            {/* REMOVED: Template Selection Modal removed */}
-
-            {/* Create Resume Title Modal */}
-            <Modal title="Create a Resume" open={isCreateModalVisible} onOk={handleConfirmCreate} onCancel={handleCancelCreate} okText="Create Resume" okButtonProps={{ style: { backgroundColor: '#22c55e', borderColor: '#22c55e' } }} closable={true} >
-                <Input placeholder="Enter resume title" value={newResumeTitle} onChange={(e) => setNewResumeTitle(e.target.value)} />
+            
+            {/* Create Resume Modal */}
+            <Modal 
+                title="Create New Resume" 
+                open={isCreateModalVisible} 
+                onOk={handleConfirmCreate} 
+                onCancel={() => setIsCreateModalVisible(false)}
+                okText="Start Building"
+                centered
+            >
+                <Form layout="vertical">
+                    <Form.Item label="Resume Title" required>
+                        <Input 
+                            placeholder="e.g. Software Engineer Application" 
+                            value={newResumeTitle} 
+                            onChange={(e) => setNewResumeTitle(e.target.value)} 
+                        />
+                    </Form.Item>
+                </Form>
             </Modal>
         </Layout>
     );
 };
 
+const BuilderPage = () => ( <App> <BuilderPageContent /> </App> );
 export default BuilderPage;

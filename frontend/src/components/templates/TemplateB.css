@@ -1,141 +1,133 @@
-/* frontend/src/components/templates/TemplateB.css */
+/* src/components/templates/TemplateB.css */
 
-.preview-container.template-modern {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  color: #333; /* Default text color */
+.template-b-container {
+    font-family: 'Arial', 'Helvetica', sans-serif;
+    color: #000;
+    line-height: 1.4;
+    font-size: 10.5pt;
+    width: 100%;
+    background: #fff;
+    box-sizing: border-box;
+    padding: 0;
 }
 
-/* --- Header Section --- */
-.modern-header {
-  background-color: var(--accent-color);
-  color: white;
-  padding: 30px 40px; /* Generous padding */
-  margin-bottom: 25px; /* Space below header */
-  border-radius: 6px; /* Optional rounded corners */
+/* === HEADER === */
+.template-b-header {
+    text-align: center;
+    margin-bottom: 20px;
 }
-.modern-name {
-  color: white !important; /* Ensure name is white */
-  font-weight: 700 !important;
-  margin-bottom: 15px !important;
-  font-size: 32px !important; /* Large name */
-  text-transform: uppercase;
+
+.template-b-name {
+    font-size: 26pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    color: #000;
 }
-.modern-contact-info {
-  display: flex;
-  flex-wrap: wrap; /* Allow wrapping on smaller screens */
-  gap: 15px 30px; /* Vertical and Horizontal gap */
-  font-size: 14px;
-}
-.modern-contact-item {
-  color: white !important; /* Ensure text is white */
-  display: flex;
-  align-items: center;
-}
-.modern-contact-item .ant-space-item {
+
+.template-b-contact {
+    font-size: 10pt;
+    font-weight: 400;
+    color: #000;
+    margin-bottom: 8px;
     display: flex;
+    justify-content: center;
     align-items: center;
-}
-.modern-contact-item .anticon {
-  font-size: 16px;
-  margin-right: 6px; /* Space between icon and text */
-  margin-top: -2px; /* Adjust alignment */
-}
-.modern-contact-item .ant-typography {
-    color: white !important; /* Ensure text inherits color */
+    flex-wrap: wrap;
 }
 
-
-/* --- Content Section --- */
-.modern-content {
-    padding: 0 10px; /* Slight padding for content area */
-}
-.modern-section {
-  margin-bottom: 25px; /* Space between sections */
-  position: relative; /* Keep for potential absolute positioning inside */
-}
-.modern-section-title {
-  font-weight: 700 !important; /* Bold */
-  font-size: 18px !important; /* Larger section title */
-  color: #333 !important; /* Dark text */
-  text-transform: uppercase;
-  margin-bottom: 15px !important;
-  border-bottom: 1px solid #eee; /* Light underline */
-  padding-bottom: 5px;
-}
-.modern-paragraph { /* For Summary */
-  font-size: 14px;
-  line-height: 1.6;
-  color: #555; /* Slightly lighter than default */
+.template-b-contact span {
+    margin: 0 4px;
 }
 
-/* --- Experience/Education/Project Items --- */
-.modern-item {
-  margin-bottom: 20px;
-  position: relative; /* Crucial for ::before positioning */
-  padding-left: 20px; /* Space for the line */
-  min-height: 30px; /* Keep minimum height */
-  /* overflow: hidden; Removed this as it didn't solve the issue */
+.template-b-contact a {
+    color: inherit;
+    text-decoration: none;
 }
 
-/* MODIFIED: Subtle vertical line - Using Anchoring */
-.modern-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;   /* Start near the top of the title */
-  height: 100%;  /* Anchor to the bottom */
-  width: 2px; /* Line thickness */
-  background-color: #eee; /* Light grey line color */
+.template-b-role {
+    font-size: 12pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 5px;
 }
 
-.modern-item-title {
-  font-weight: 600 !important;
-  font-size: 16px !important;
-  color: #333;
-  margin-bottom: 2px !important;
-}
-.modern-item-subtitle {
-  /* Color set inline using accentColor */
-  font-weight: 600;
-  font-size: 14px;
-  display: block;
-  margin-bottom: 6px;
-}
-.modern-item-date {
-  font-size: 13px;
-  font-weight: 500;
-  color: #777; /* Medium gray */
-  text-align: right;
-  white-space: nowrap;
-}
-.modern-item-description {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #555;
-  margin-top: 8px;
-  padding-left: 0;
-  list-style: none; /* Ensure no bullets if using <p> or <div> */
-  margin-left: 0;
-}
-.modern-item-gpa {
-  margin: 2px 0 0 0 !important;
-  font-size: 13px !important;
-  color: #777 !important;
+/* === SECTION BARS === */
+.template-b-section {
+    margin-bottom: 15px;
 }
 
-/* --- Skills Section --- */
-.modern-skills-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px; /* Gap between tags */
-  margin-top: 10px;
+.template-b-section-title {
+    background-color: #d0e0e3; /* Exact Pastel Blue from screenshot */
+    padding: 4px 10px;
+    font-size: 11pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #000;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc; /* Subtle separation line */
 }
-.modern-skill-tag {
-  background-color: var(--accent-color) !important;
-  color: white !important;
-  border-radius: 16px !important; /* Pill shape */
-  border: none !important;
-  padding: 5px 12px !important; /* Adjust padding */
-  font-size: 14px !important;
-  line-height: 1.5; /* Adjust line height for padding */
+
+/* === CONTENT ITEMS === */
+.template-b-item {
+    margin-bottom: 10px;
+    padding: 0 5px; 
+}
+
+/* Row: "Title | Company ........... Date" */
+.template-b-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 2px;
+}
+
+.template-b-main-text {
+    font-weight: 700; /* Bold Title */
+    font-size: 10.5pt;
+    color: #000;
+}
+
+.template-b-date {
+    font-weight: 400;
+    text-align: right;
+    white-space: nowrap;
+    font-size: 10pt;
+}
+
+/* Bullets */
+.template-b-list {
+    margin: 2px 0 0 0;
+    padding-left: 18px;
+    font-size: 10pt;
+}
+
+.template-b-list li {
+    margin-bottom: 2px;
+}
+
+/* === SKILLS (2-Column Layout) === */
+.template-b-skills-container {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 5px;
+}
+
+.template-b-skill-col {
+    width: 50%;
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+
+.template-b-skill-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 10pt;
+}
+
+.template-b-skill-list li {
+    margin-bottom: 2px;
 }

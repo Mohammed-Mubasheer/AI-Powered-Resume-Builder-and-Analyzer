@@ -1,189 +1,286 @@
-// frontend/src/components/templates/TemplateA.js
 import React from 'react';
-// NEW: Import Divider from antd
-import { Typography, Row, Col, Space, Tag, Divider } from 'antd';
-import {
-    MailOutlined, PhoneOutlined, EnvironmentOutlined, LinkedinOutlined, GlobalOutlined, GithubOutlined // Keep GithubOutlined
-} from '@ant-design/icons';
-import './TemplateA.css'; // Uses TemplateA.css
+import './TemplateA.css';
 import dayjs from 'dayjs';
+import { 
+    EnvironmentFilled, 
+    MailFilled, 
+    PhoneFilled, 
+    LinkedinFilled, 
+   GithubFilled,
+} from '@ant-design/icons';
 
-const { Title, Text, Paragraph } = Typography;
+const TemplateA = ({ data, targetProfile }) => {
 
-// ContactItem component remains the same
-const ContactItem = ({ icon, text }) => (
-    <Space className="contact-item">
-        {icon}
-        <Text>{text}</Text>
-    </Space>
-);
+    // 1. SETTINGS
+    // Rezi style uses dark slate/black. We ignore accentColor to keep it strict.
+    const themeColor = '#2e3e4e';
 
-// Helper function remains the same
-const parseSortDate = (dateString, isPresent = false) => {
-    if (isPresent) return dayjs();
-    if (!dateString) return dayjs(0);
-    const date = dayjs(dateString);
-    return date.isValid() ? date : dayjs(0);
+    // Ensures the link always starts with https://
+const ensureUrl = (url) => {
+    if (!url) return '';
+    return url.startsWith('http') ? url : `https://${url}`;
 };
 
-const TemplateA = ({ resumeData, accentColor }) => {
-    const {
-        personalInfo = {},
-        summary = '',
-        experience = [],
-        education = [],
-        projects = [],
-        skills = []
-    } = resumeData || {};
-
-    const isGithub = (url) => url && (url.includes('github.com'));
-
-    // NEW: Helper function to determine GitHub URL specifically
-    const getGithubUrl = (website) => {
-        if (website && isGithub(website)) return website;
-        return null; // Return null if website isn't GitHub
+    // 2. HELPERS
+    const formatDate = (date) => {
+        if (!date) return '';
+        return dayjs(date).isValid() ? dayjs(date).format('MMMM YYYY') : date;
     };
-    const githubUrl = getGithubUrl(personalInfo.website); // Get it once
+    
+    // Output: "August 2015 — Present" (using the long dash from screenshot)
+    const formatDateRange = (start, end, current) => {
+        const startDate = formatDate(start);
+        const endDate = current ? 'Present' : formatDate(end);
+        if (!startDate && !endDate) return '';
+        return `${startDate} — ${endDate}`;
+    };
+
+    const formatLink = (url) => url ? url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : '';
+    
+    const formatLinkedIn = (url) => {
+        const match = url?.match(/in\/([^/]+)/);
+        return match ? `in/${match[1]}` : formatLink(url);
+    };
+    // Helper to make GitHub look clean (e.g. "github.com/username" or just "username")
+    const formatGitHub = (url) => {
+        // Tries to grab just the username if it's a standard github url
+        const match = url?.match(/github\.com\/([^/]+)/);
+        return match ? `github.com/${match[1]}` : formatLink(url);
+    };
+
+    // =========================================================================
+    // 3. DEFINE BLOCKS (Structure matches Charles Bloomberg screenshot)
+    // =========================================================================
+
+    const ExperienceBlock = data?.experience?.length > 0 && (
+        <div className="template-a-section">
+            <div className="template-a-section-title">EXPERIENCE</div>
+            {data.experience.map((exp, i) => (
+                <div key={i} className="template-a-item">
+                    {/* Row 1: Job Title (Bold) */}
+                    <div className="template-a-row-title">
+                        {exp.title}
+                    </div>
+                    
+                    {/* Row 2: Company (Left) --- Date, Location (Right) */}
+                    <div className="template-a-row-details">
+                        <span className="template-a-company">{exp.company}</span>
+                        <span className="template-a-date-loc">
+                            {formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking)}
+                            {exp.location && `, ${exp.location}`}
+                        </span>
+                    </div>
+
+                    {/* Bullets */}
+                    {exp.description && (
+                        <ul className="template-a-list">
+                            {exp.description.split('\n').map((line, idx) => line.trim() && <li key={idx}>{line}</li>)}
+                        </ul>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+
+    const ProjectsBlock = data?.projects?.length > 0 && (
+        <div className="template-a-section">
+            <div className="template-a-section-title">PROJECT</div>
+            {data.projects.map((proj, i) => (
+                <div key={i} className="template-a-item">
+                    {/* Row 1: Project Name (Bold) */}
+                    <div className="template-a-row-title">
+                        {proj.name}
+                    </div>
+                    
+                    {/* Row 2: Role/Type (Left) --- Date (Right) */}
+                    <div className="template-a-row-details">
+                        <span className="template-a-company">{proj.type}</span> 
+                        <span className="template-a-date-loc">
+                            {formatDateRange(proj.startDate, proj.endDate, proj.currentlyWorking)}
+                        </span>
+                    </div>
+
+                    {proj.description && (
+                        <ul className="template-a-list">
+                            {proj.description.split('\n').map((line, idx) => line.trim() && <li key={idx}>{line}</li>)}
+                        </ul>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+
+    const EducationBlock = data?.education?.length > 0 && (
+        <div className="template-a-section">
+            <div className="template-a-section-title">EDUCATION</div>
+            {data.education.map((edu, i) => (
+                <div key={i} className="template-a-item">
+                    {/* Row 1: Degree (Bold) */}
+                    <div className="template-a-row-title">
+                        {edu.degree} {edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}
+                    </div>
+                    
+                    {/* Row 2: University (Left) --- Year/Location (Right) */}
+                    <div className="template-a-row-details">
+                        <span className="template-a-company">{edu.institutionName}</span>
+                        <span className="template-a-date-loc">{formatDate(edu.date)}</span> 
+                    </div>
+                    
+                    {/* GPA Line if exists */}
+                    {edu.gpa && <div style={{ fontSize: '10pt', marginTop: '2px' }}>GPA: {edu.gpa}</div>}
+                </div>
+            ))}
+        </div>
+    );
+
+    const SkillsBlock = data?.skills?.length > 0 && (
+        <div className="template-a-section">
+            <div className="template-a-section-title">SKILLS</div>
+            <div className="template-a-skills-text">
+                {/* If you want categorized skills like the screenshot (Leadership: ..., Front End: ...),
+                   you would need a categorized data structure. 
+                   For now, we render them as a comma-separated list to match the look.
+                */}
+                <span style={{ fontWeight: 'bold' }}>Skills: </span>
+                {data.skills.map(s => s.name).join(', ')}
+            </div>
+        </div>
+    );
+
+    const CertificatesBlock = data?.certificates?.length > 0 && (
+        <div className="template-a-section">
+            <div className="template-a-section-title">CERTIFICATES</div>
+            {data.certificates.map((cert, i) => (
+                <div key={i} className="template-a-item">
+                    <div className="template-a-row-title">{cert.name}</div>
+                    <div className="template-a-row-details">
+                        <span>{cert.issuer}</span>
+                        <span>{formatDate(cert.date)}</span>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
+    // =========================================================================
+    // 4. ORDER LOGIC (PRESERVED)
+    // =========================================================================
+
+    let LayoutContent;
+
+    if (targetProfile === 'intern' || targetProfile === 'fresher') {
+        LayoutContent = (
+            <>
+                {EducationBlock}
+                {SkillsBlock}
+                {ProjectsBlock}
+                {ExperienceBlock}
+                {CertificatesBlock}
+            </>
+        );
+    } 
+    else if (targetProfile === 'technical') {
+        LayoutContent = (
+            <>
+                {SkillsBlock}
+                {ProjectsBlock}
+                {ExperienceBlock}
+                {EducationBlock}
+                {CertificatesBlock}
+            </>
+        );
+    } 
+    else if (targetProfile === 'switch') {
+         LayoutContent = (
+            <>
+                {SkillsBlock}
+                {ProjectsBlock}
+                {ExperienceBlock}
+                {CertificatesBlock}
+                {EducationBlock}
+            </>
+        );
+    }
+    else {
+        // Experienced / Default
+        LayoutContent = (
+            <>
+                {ExperienceBlock}
+                {ProjectsBlock}
+                {EducationBlock}
+                {SkillsBlock}
+                {CertificatesBlock}
+            </>
+        );
+    }
+
+    // =========================================================================
+    // 5. FINAL RENDER
+    // =========================================================================
 
     return (
-        // MODIFIED: Added 'template-classic-preview' class
-        <div className="preview-container template-classic-preview" style={{ '--accent-color': accentColor }}>
+        <div className="template-a-container">
+            
+            {/* HEADER */}
+            <header className="template-a-header">
+                <h1 className="template-a-name">
+                    {data?.personalInfo?.name || "Charles Bloomberg"}
+                </h1>
+                
+                <div className="template-a-contact">
+                    {data?.personalInfo?.location && (
+                        <span><EnvironmentFilled style={{ fontSize: '11px' }} />{data.personalInfo.location}</span>
+                    )}
+                    
+                    {data?.personalInfo?.email && (
+                        <span><MailFilled style={{ fontSize: '11px' }} /><a href={`mailto:${data.personalInfo.email}`}>{data.personalInfo.email}</a></span>
+                    )}
+                    
+                    {data?.personalInfo?.phone && (
+                        <span><PhoneFilled style={{ fontSize: '11px' }} />{data.personalInfo.phone}</span>
+                    )}
+                    
+                    {/* LinkedIn */}
+{data?.personalInfo?.linkedin && (
+    <span>
+        <LinkedinFilled style={{ fontSize: '11px' }} />
+        {/* href uses ensureUrl(), text uses formatLinkedIn() */}
+        <a href={ensureUrl(data.personalInfo.linkedin)} target="_blank" rel="noreferrer">
+            {formatLinkedIn(data.personalInfo.linkedin)}
+        </a>
+    </span>
+)}
 
-            {/* --- MODIFIED: Header Structure --- */}
-            <div className="classic-header">
-                 <Title level={2} className="classic-name" style={{ color: accentColor }}>{personalInfo.name || 'Your Name'}</Title>
-                 <div className="contact-info classic-contact-info">
-                    {/* Filter out GitHub from main contact line */}
-                    {personalInfo.email && <ContactItem icon={<MailOutlined />} text={personalInfo.email} />}
-                    {personalInfo.phone && <ContactItem icon={<PhoneOutlined />} text={personalInfo.phone} />}
-                    {personalInfo.location && <ContactItem icon={<EnvironmentOutlined />} text={personalInfo.location} />}
-                    {personalInfo.linkedin && <ContactItem icon={<LinkedinOutlined />} text={personalInfo.linkedin} />}
-                    {/* Render non-GitHub website if it exists */}
-                    {personalInfo.website && !isGithub(personalInfo.website) && <ContactItem icon={<GlobalOutlined />} text={personalInfo.website} />}
-                 </div>
-                 {/* Render GitHub separately below */}
-                 {githubUrl && (
-                    <div className="github-info">
-                         <ContactItem icon={<GithubOutlined />} text={githubUrl} />
+{/* GitHub / Website */}
+{data?.personalInfo?.website && (
+    <span>
+        <GithubFilled style={{ fontSize: '11px' }} />
+        <a href={ensureUrl(data.personalInfo.website)} target="_blank" rel="noreferrer">
+            {formatGitHub(data.personalInfo.website)}
+        </a>
+    </span>
+)}
+                </div>
+                
+                {/* Horizontal Rule under header */}
+                <hr style={{ marginTop: '15px', border: 'none', borderBottom: '1px solid #ccc' }} />
+            </header>
+
+            {/* SUMMARY */}
+            {data?.summary && (
+                <div className="template-a-section">
+                    <div className="template-a-section-title">PROFESSIONAL SUMMARY</div>
+                    <div className="template-a-skills-text">
+                        {data.summary}
                     </div>
-                 )}
-                 <Divider className="classic-divider" style={{ borderColor: accentColor }} />
-            </div>
-            {/* ---------------------------------- */}
-
-
-            {summary && (
-                <div className="preview-section">
-                    {/* MODIFIED: Use classic class */}
-                    <Title level={4} className="preview-section-title classic-title">Professional Summary</Title>
-                    {/* MODIFIED: Use classic class */}
-                    <Paragraph className="classic-paragraph">{summary}</Paragraph>
                 </div>
             )}
 
-             {experience.length > 0 && (
-                 <div className="preview-section">
-                    <Title level={4} className="preview-section-title classic-title">Professional Experience</Title>
-                    {experience
-                        .slice()
-                        .sort((a, b) => {
-                            const dateB = parseSortDate(b.endDate, b.currentlyWorking);
-                            const dateA = parseSortDate(a.endDate, a.currentlyWorking);
-                            if (dateB.isSame(dateA)) { return parseSortDate(b.startDate) - parseSortDate(a.startDate); }
-                            return dateB - dateA;
-                         })
-                        .map((job, index) => (
-                        // MODIFIED: Added 'classic-item' class
-                        <div key={index} className="experience-item classic-item">
-                            {/* MODIFIED: Row/Col structure for title/date alignment */}
-                            <Row justify="space-between" align="top">
-                                <Col flex="auto">
-                                    <Title level={5} className="classic-item-title">{job.title || 'Job Title'}</Title>
-                                    <Text className="classic-item-subtitle">{job.company || 'Company Name'}</Text>
-                                </Col>
-                                <Col flex="none">
-                                    <Text className="classic-item-date">
-                                        {job.startDate ? dayjs(job.startDate).format('MMM YYYY') : ''} - {job.currentlyWorking ? 'Present' : (job.endDate ? dayjs(job.endDate).format('MMM YYYY') : '')}
-                                    </Text>
-                                </Col>
-                            </Row>
-                            {/* MODIFIED: Use classic class */}
-                            <ul className="classic-item-description">
-                                {job.description?.split('\n').map((line, i) => (line && <li key={i}>{line}</li>))}
-                            </ul>
-                        </div>
-                    ))}
-                </div>
-             )}
+            {/* SECTIONS */}
+            {LayoutContent}
 
-            {projects.length > 0 && (
-                <div className="preview-section">
-                    <Title level={4} className="preview-section-title classic-title">Projects</Title>
-                    {projects.map((project, index) => (
-                        // MODIFIED: Added 'classic-item' class
-                        <div key={index} className="experience-item classic-item">
-                             {/* MODIFIED: Row/Col structure */}
-                            <Row justify="space-between" align="top">
-                                <Col flex="auto">
-                                    <Title level={5} className="classic-item-title">{project.name || 'Project Name'}</Title>
-                                    {project.type && <Text className="classic-item-subtitle">{project.type}</Text>}
-                                </Col>
-                            </Row>
-                             {/* MODIFIED: Use classic class */}
-                            <Paragraph className="classic-paragraph" style={{ marginTop: '5px' }}>
-                                {project.description || 'Project description...'}
-                            </Paragraph>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-
-             {education.length > 0 && (
-                 <div className="preview-section">
-                    <Title level={4} className="preview-section-title classic-title">Education</Title>
-                     {education
-                        .slice()
-                        .sort((a, b) => parseSortDate(b.date) - parseSortDate(a.date))
-                        .map((school, index) => (
-                         // MODIFIED: Added 'classic-item' class
-                         <div key={index} className="experience-item classic-item">
-                             {/* MODIFIED: Row/Col structure */}
-                             <Row justify="space-between" align="top">
-                                <Col flex="auto">
-                                    <Title level={5} className="classic-item-title">{school.degree}{school.fieldOfStudy ? ` in ${school.fieldOfStudy}` : '' || 'Degree'}</Title>
-                                    <Text className="classic-item-subtitle">{school.institutionName || 'Institution Name'}</Text>
-                                    {/* MODIFIED: Use classic class */}
-                                    {school.gpa && <Paragraph className="classic-item-gpa">GPA: {school.gpa}</Paragraph>}
-                                </Col>
-                                <Col flex="none">
-                                    <Text className="classic-item-date">{school.date ? dayjs(school.date).format('MMM YYYY') : ''}</Text>
-                                </Col>
-                             </Row>
-                         </div>
-                     ))}
-                 </div>
-             )}
-
-
-              {skills.length > 0 && (
-                  <div className="preview-section">
-                    <Title level={4} className="preview-section-title classic-title">Core Skills</Title>
-                    {/* Ensure this div has the correct class */}
-                    <div className="classic-skills-list">
-                        {skills.map((skill, index) => (
-                            skill.name && (
-                                <React.Fragment key={index}>
-                                    <Text>{skill.name}</Text>
-                                    {index < skills.length - 1 && <Text className="skill-separator"> • </Text>}
-                                </React.Fragment>
-                            )
-                        ))}
-                    </div>
-                  </div>
-              )}
         </div>
     );
 };
 
-export default TemplateA; // Keep export name as TemplateA
+export default TemplateA;

@@ -18,17 +18,14 @@ class Resume(models.Model):
 # --- NEW: Analysis Model ---
 class Analysis(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    job_role = models.CharField(max_length=255)
-    # We'll upload files to a 'uploads/resumes/' folder
-    resume_file = models.FileField(upload_to='uploads/resumes/')
-    
-    # Store the scores separately for easy querying/charts later
-    ats_score_general = models.IntegerField()
-    ats_score_jd_match = models.IntegerField(null=True, blank=True)
-    
-    # Store the complete detailed report (skills, missing keywords, etc.)
-    analysis_result = models.JSONField() 
-    
+    job_role = models.CharField(max_length=100)
+    resume_file = models.FileField(upload_to='resumes/')
+
+    # Make sure these exist!
+    ats_score_general = models.IntegerField(default=0)
+    ats_score_jd_match = models.IntegerField(default=0, null=True)
+    analysis_result = models.JSONField(default=dict) # Requires Django 3.0+
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
